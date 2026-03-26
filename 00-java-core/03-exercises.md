@@ -1,69 +1,380 @@
 # Phase 0: Java Core Mastery - Bài Tập Thực Hành
 
-> **Thời gian:** 4-6 giờ
-> **Quan trọng:** Đây là nền tảng cho Senior Java!
+> **Thời gian:** 2-3 tuần
+> **Mục tiêu:** Thực hành toàn bộ Java Core theo roadmap.sh/java
+> **Quan trọng:** Hoàn thành các bài tập này để solidify kiến thức!
 
 ---
 
-## 📝 BÀI TẬP 1: HASHMAP CUSTOM IMPLEMENTATION (2 giờ)
+## 📝 BÀI TẬP 1: JAVA BASICS (2-3 giờ)
 
-### Đề bài
+### 1.1 String Manipulation
 
-**Implement một HashMap đơn giản** (không dùng `java.util.HashMap`)
-
-**Yêu cầu:**
-1. Array of buckets
-2. Linked list cho collision
-3. Auto-resize khi load factor > 0.75
-4. Support put(), get(), remove()
-
-### Code template
+**Đề bài:** Implement các utility methods cho String
 
 ```java
-public class MyHashMap<K, V> {
+public class StringUtilities {
 
-    private static final int DEFAULT_CAPACITY = 16;
-    private static final float LOAD_FACTOR = 0.75f;
+    // 1. Reverse a string without using StringBuilder.reverse()
+    public static String reverse(String input) {
+        // TODO: Implement
+        // Example: "Hello" -> "olleH"
+    }
 
-    private Node<K, V>[] buckets;
+    // 2. Check if string is palindrome
+    public static boolean isPalindrome(String input) {
+        // TODO: Implement
+        // Example: "racecar" -> true, "hello" -> false
+    }
+
+    // 3. Count vowels and consonants
+    public static Map<String, Integer> countVowelsConsonants(String input) {
+        // TODO: Implement
+        // Return: {"vowels": 3, "consonants": 5}
+    }
+
+    // 4. Remove duplicates from string (keep first occurrence)
+    public static String removeDuplicates(String input) {
+        // TODO: Implement
+        // Example: "programming" -> "progamin"
+    }
+
+    // 5. Find first non-repeated character
+    public static Character firstNonRepeated(String input) {
+        // TODO: Implement
+        // Example: "swiss" -> 'w', "aabb" -> null
+    }
+
+    // Test
+    public static void main(String[] args) {
+        System.out.println(reverse("Hello"));  // olleH
+        System.out.println(isPalindrome("racecar"));  // true
+        System.out.println(firstNonRepeated("swiss"));  // w
+    }
+}
+```
+
+---
+
+### 1.2 Array Operations
+
+**Đề bài:** Implement các thuật toán trên array
+
+```java
+public class ArrayAlgorithms {
+
+    // 1. Find maximum and minimum in array
+    public static Map<String, Integer> findMinMax(int[] arr) {
+        // TODO: Implement
+    }
+
+    // 2. Find second largest element
+    public static Integer findSecondLargest(int[] arr) {
+        // TODO: Implement
+        // Example: [1, 5, 3, 9, 2] -> 5
+    }
+
+    // 3. Rotate array by k positions
+    public static void rotate(int[] arr, int k) {
+        // TODO: Implement
+        // Example: [1,2,3,4,5], k=2 -> [4,5,1,2,3]
+    }
+
+    // 4. Remove duplicates from sorted array
+    public static int removeDuplicates(int[] arr) {
+        // TODO: Implement
+        // Return new length, modify array in-place
+    }
+
+    // 5. Two Sum - Find two numbers that add up to target
+    public static int[] twoSum(int[] arr, int target) {
+        // TODO: Implement
+        // Return indices of two numbers
+        // Example: [2,7,11,15], target=9 -> [0,1]
+    }
+
+    // 6. Merge two sorted arrays
+    public static int[] mergeSortedArrays(int[] arr1, int[] arr2) {
+        // TODO: Implement
+    }
+
+    // Test
+    public static void main(String[] args) {
+        int[] nums = {1, 5, 3, 9, 2};
+        System.out.println(findSecondLargest(nums));  // 5
+
+        int[] sorted1 = {1, 3, 5};
+        int[] sorted2 = {2, 4, 6};
+        System.out.println(Arrays.toString(mergeSortedArrays(sorted1, sorted2)));
+    }
+}
+```
+
+---
+
+## 📝 BÀI TẬP 2: OOP DESIGN (3-4 giờ)
+
+### 2.1 Library Management System
+
+**Đề bài:** Design một hệ thống quản lý thư viện sử dụng OOP principles
+
+```java
+// Requirements:
+// 1. Books have: title, author, ISBN, publicationYear, isAvailable
+// 2. Members can borrow up to 3 books
+// 3. Track borrowing history
+// 4. Calculate late fees ($1 per day)
+
+// TODO: Design classes with proper encapsulation, inheritance, polymorphism
+
+// Starter code:
+abstract class LibraryItem {
+    private String title;
+    private String id;
+    private boolean isAvailable;
+
+    // TODO: Add constructor, getters, abstract methods
+    public abstract double calculateLateFee(int daysLate);
+}
+
+class Book extends LibraryItem {
+    private String author;
+    private String isbn;
+    private int publicationYear;
+
+    // TODO: Implement
+}
+
+class Member {
+    private String memberId;
+    private String name;
+    private List<Book> borrowedBooks;
+    private List<BorrowRecord> borrowingHistory;
+
+    // TODO: Implement borrow, return methods
+}
+
+class BorrowRecord {
+    private Book book;
+    private Member member;
+    private LocalDate borrowDate;
+    private LocalDate dueDate;
+    private LocalDate returnDate;
+
+    // TODO: Implement
+}
+
+class Library {
+    private List<Book> catalog;
+    private List<Member> members;
+
+    // TODO: Implement search, borrow, return methods
+}
+```
+
+**Test cases:**
+```java
+public class LibraryTest {
+    public static void main(String[] args) {
+        Library library = new Library();
+
+        // Add books
+        library.addBook(new Book("Java Core", "Author1", "ISBN1", 2023));
+        library.addBook(new Book("Spring Boot", "Author2", "ISBN2", 2022));
+
+        // Register member
+        Member member = new Member("M001", "John Doe");
+        library.registerMember(member);
+
+        // Borrow books
+        member.borrowBook(library.searchByTitle("Java Core"));
+
+        // Return book late
+        member.returnBook("ISBN1", LocalDate.now().minusDays(5));
+        // Should calculate late fee
+    }
+}
+```
+
+---
+
+### 2.2 Payment System Design
+
+**Đề bài:** Design payment system với interfaces và enums
+
+```java
+// Payment methods: CreditCard, DebitCard, PayPal, Crypto
+// Each has different processing fee and validation
+
+enum PaymentMethod {
+    CREDIT_CARD(0.029),    // 2.9% fee
+    DEBIT_CARD(0.015),     // 1.5% fee
+    PAYPAL(0.035),         // 3.5% fee
+    BITCOIN(0.01);         // 1% fee
+
+    private final double feePercentage;
+
+    PaymentMethod(double fee) {
+        this.feePercentage = fee;
+    }
+
+    public double calculateFee(double amount) {
+        return amount * feePercentage;
+    }
+}
+
+interface PaymentProcessor {
+    boolean authenticate();
+    boolean processPayment(double amount);
+    void refund(String transactionId);
+}
+
+// TODO: Implement concrete classes
+class CreditCardProcessor implements PaymentProcessor {
+    // TODO: Implement
+}
+
+class PayPalProcessor implements PaymentProcessor {
+    // TODO: Implement
+}
+
+// Usage
+public class PaymentService {
+    public void checkout(PaymentProcessor processor, double amount) {
+        if (processor.authenticate()) {
+            processor.processPayment(amount);
+        }
+    }
+}
+```
+
+---
+
+## 📝 BÀI TẬP 3: COLLECTIONS (4-5 giờ)
+
+### 3.1 Custom Data Structures
+
+**Đề bài 1:** Implement ArrayList từ scratch
+
+```java
+public class MyArrayList<T> implements List<T> {
+    private Object[] elements;
+    private int size;
+    private static final int DEFAULT_CAPACITY = 10;
+
+    public MyArrayList() {
+        elements = new Object[DEFAULT_CAPACITY];
+    }
+
+    public MyArrayList(int capacity) {
+        elements = new Object[capacity];
+    }
+
+    @Override
+    public boolean add(T element) {
+        // TODO: Implement
+        // - Check capacity, resize if needed
+        // - Add element at end
+        // - Increment size
+    }
+
+    @Override
+    public void add(int index, T element) {
+        // TODO: Implement
+        // - Check bounds
+        // - Shift elements right
+        // - Insert at index
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public T get(int index) {
+        // TODO: Implement
+        // - Check bounds
+        // - Return element at index
+        return (T) elements[index];
+    }
+
+    @Override
+    public T remove(int index) {
+        // TODO: Implement
+        // - Check bounds
+        // - Save element to return
+        // - Shift elements left
+        // - Decrement size
+    }
+
+    @Override
+    public int size() {
+        return size;
+    }
+
+    // TODO: Implement other methods: set, indexOf, contains, etc.
+
+    private void ensureCapacity() {
+        // TODO: Implement resize (double capacity)
+    }
+}
+```
+
+**Đề bài 2:** Implement Stack và Queue
+
+```java
+// Stack (LIFO)
+public class MyStack<T> {
+    private Node<T> top;
     private int size;
 
-    private static class Node<K, V> {
-        final K key;
-        V value;
-        Node<K, V> next;
+    public void push(T value) {
+        // TODO: Implement
+    }
 
-        Node(K key, V value) {
-            this.key = key;
+    public T pop() {
+        // TODO: Implement
+    }
+
+    public T peek() {
+        // TODO: Implement
+    }
+
+    public boolean isEmpty() {
+        // TODO: Implement
+    }
+
+    public int size() {
+        return size;
+    }
+
+    private static class Node<T> {
+        T value;
+        Node<T> next;
+
+        Node(T value) {
             this.value = value;
         }
     }
+}
 
-    public MyHashMap() {
-        buckets = new Node[DEFAULT_CAPACITY];
+// Queue (FIFO)
+public class MyQueue<T> {
+    private Node<T> front;
+    private Node<T> rear;
+    private int size;
+
+    public void enqueue(T value) {
+        // TODO: Implement
     }
 
-    public void put(K key, V value) {
+    public T dequeue() {
         // TODO: Implement
-        // 1. Tính hash
-        // 2. Tính bucket index
-        // 3. Nếu bucket có Node, traverse linked list
-        // 4. Nếu key tồn tại → update, không → add mới
-        // 5. Nếu size > threshold → resize
     }
 
-    public V get(K key) {
+    public T peek() {
         // TODO: Implement
-        // 1. Tính hash và bucket index
-        // 2. Traverse linked list tìm key
-        // 3. Return value hoặc null
     }
 
-    public V remove(K key) {
+    public boolean isEmpty() {
         // TODO: Implement
-        // 1. Tìm Node trong bucket
-        // 2. Remove khỏi linked list
-        // 3. Return value cũ
     }
 
     public int size() {
@@ -72,465 +383,762 @@ public class MyHashMap<K, V> {
 }
 ```
 
-### Test cases
+---
+
+### 3.2 Collections Practice Problems
 
 ```java
-public class MyHashMapTest {
+public class CollectionsProblems {
 
-    @Test
-    public void testPutAndGet() {
-        MyHashMap<String, String> map = new MyHashMap<>();
-        map.put("key1", "value1");
-        map.put("key2", "value2");
-
-        assertEquals("value1", map.get("key1"));
-        assertEquals("value2", map.get("key2"));
-        assertNull(map.get("key3"));
+    // 1. Group words by their first letter
+    public static Map<Character, List<String>> groupByFirstLetter(List<String> words) {
+        // TODO: Implement using HashMap
+        // Example: ["apple", "banana", "apricot"] -> {a=[apple, apricot], b=[banana]}
     }
 
-    @Test
-    public void testUpdateExistingKey() {
-        MyHashMap<String, String> map = new MyHashMap<>();
-        map.put("key1", "value1");
-        map.put("key1", "updated_value");
-
-        assertEquals("updated_value", map.get("key1"));
-        assertEquals(1, map.size());
+    // 2. Find most frequent element
+    public static <T> T findMostFrequent(List<T> list) {
+        // TODO: Implement using HashMap
+        // Example: [1, 2, 2, 3, 2, 4] -> 2
     }
 
-    @Test
-    public void testRemove() {
-        MyHashMap<String, String> map = new MyHashMap<>();
-        map.put("key1", "value1");
-        map.put("key2", "value2");
-
-        assertEquals("value1", map.remove("key1"));
-        assertNull(map.get("key1"));
-        assertEquals(1, map.size());
+    // 3. Remove duplicates from LinkedList
+    public static <T> void removeDuplicates(LinkedList<T> list) {
+        // TODO: Implement using HashSet
     }
 
-    @Test
-    public void testResize() {
-        MyHashMap<Integer, String> map = new MyHashMap<>();
+    // 4. Implement LRU Cache
+    public class LRUCache<K, V> {
+        private final int capacity;
+        private final Map<K, V> map;
+        private final LinkedList<K> order;
 
-        // Thêm nhiều keys để trigger resize
-        for (int i = 0; i < 100; i++) {
-            map.put(i, "value" + i);
+        public LRUCache(int capacity) {
+            this.capacity = capacity;
+            this.map = new HashMap<>();
+            this.order = new LinkedList<>();
         }
 
-        // Verify tất cả values vẫn accessible
-        for (int i = 0; i < 100; i++) {
-            assertEquals("value" + i, map.get(i));
+        public void put(K key, V value) {
+            // TODO: Implement
+            // - If exists, update and move to front
+            // - If new and full, remove least recently used
+            // - Add to front
+        }
+
+        public V get(K key) {
+            // TODO: Implement
+            // - Return value and move to front
+            // - Or return null if not exists
         }
     }
 
-    @Test
-    public void testCollision() {
-        MyHashMap<BadHashKey, String> map = new MyHashMap<>();
-
-        // BadHashKey luôn trả về cùng hashCode
-        for (int i = 0; i < 10; i++) {
-            map.put(new BadHashKey(i), "value" + i);
-        }
-
-        // Verify tất cả values vẫn accessible
-        for (int i = 0; i < 10; i++) {
-            assertEquals("value" + i, map.get(new BadHashKey(i)));
-        }
-    }
-}
-
-class BadHashKey {
-    private int value;
-
-    public BadHashKey(int value) {
-        this.value = value;
+    // 5. Merge K sorted lists
+    public static List<Integer> mergeKSortedLists(List<List<Integer>> lists) {
+        // TODO: Implement using PriorityQueue
     }
 
-    @Override
-    public int hashCode() {
-        return 42;  // ❌ Tất cả keys có cùng hash!
-    }
+    // Test
+    public static void main(String[] args) {
+        List<String> words = Arrays.asList("apple", "banana", "apricot", "blueberry");
+        System.out.println(groupByFirstLetter(words));
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BadHashKey)) return false;
-        BadHashKey other = (BadHashKey) o;
-        return this.value == other.value;
+        LRUCache<String, Integer> cache = new LRUCache<>(2);
+        cache.put("a", 1);
+        cache.put("b", 2);
+        cache.get("a");  // Access "a"
+        cache.put("c", 3);  // Should evict "b"
     }
 }
 ```
 
 ---
 
-## 📝 BÀI TẬP 2: THREAD-SAFE COUNTER (1 giờ)
+## 📝 BÀI TẬP 4: STREAM API & LAMBDA (3-4 giờ)
 
-### Đề bài
-
-Implement thread-safe counter với các yêu cầu:
-
-**Part 1:** Dùng `synchronized`
-**Part 2:** Dùng `ReentrantLock`
-**Part 3:** Dùng `AtomicLong`
-**Part 4:** So sánh performance
-
-### Code template
+### 4.1 Stream Exercises
 
 ```java
-public class ThreadSafeCounter {
+public class StreamExercises {
 
-    // Part 1: synchronized
-    static class SynchronizedCounter {
-        private long count = 0;
+    // Given list of employees
+    List<Employee> employees = Arrays.asList(
+        new Employee("John", 30, "IT", 50000),
+        new Employee("Jane", 25, "HR", 45000),
+        new Employee("Bob", 35, "IT", 60000),
+        new Employee("Alice", 28, "Finance", 55000),
+        new Employee("Charlie", 32, "IT", 52000)
+    );
 
-        public synchronized void increment() {
-            count++;
+    // 1. Find all IT employees with salary > 50000
+    public List<Employee> findHighPaidITEmployees() {
+        return employees.stream()
+            // TODO: Complete
+            .collect(Collectors.toList());
+    }
+
+    // 2. Calculate average salary by department
+    public Map<String, Double> getAverageSalaryByDept() {
+        return employees.stream()
+            // TODO: Complete
+    }
+
+    // 3. Find employee with highest salary
+    public Optional<Employee> findHighestPaid() {
+        return employees.stream()
+            // TODO: Complete
+    }
+
+    // 4. Get total salary budget per department
+    public Map<String, Double> getTotalSalaryByDept() {
+        return employees.stream()
+            // TODO: Complete
+    }
+
+    // 5. Group employees by age range (20s, 30s, 40s, etc.)
+    public Map<String, List<Employee>> groupByAgeRange() {
+        return employees.stream()
+            // TODO: Complete
+    }
+
+    // 6. Find sum of all salaries
+    public double getTotalSalaryBudget() {
+        return employees.stream()
+            // TODO: Complete
+    }
+
+    // 7. Check if all employees have salary > 30000
+    public boolean allWellPaid() {
+        return employees.stream()
+            // TODO: Complete
+    }
+
+    // 8. Get comma-separated list of employee names
+    public String getAllNames() {
+        return employees.stream()
+            // TODO: Complete
+    }
+
+    // 9. Find 2 highest paid employees
+    public List<Employee> getTop2Earners() {
+        return employees.stream()
+            // TODO: Complete
+    }
+
+    // 10. Partition employees into high/low salary (threshold: 55000)
+    public Map<Boolean, List<Employee>> partitionBySalary() {
+        return employees.stream()
+            // TODO: Complete
+    }
+
+    class Employee {
+        String name;
+        int age;
+        String department;
+        double salary;
+
+        // Constructor, getters
+    }
+}
+```
+
+---
+
+### 4.2 Functional Interfaces Practice
+
+```java
+public class FunctionalInterfaceExercises {
+
+    // 1. Create Predicate that checks if string is palindrome
+    public Predicate<String> isPalindrome() {
+        // TODO: Implement
+    }
+
+    // 2. Create Function that converts List<String> to Map<String, Integer> (word -> length)
+    public Function<List<String>, Map<String, Integer>> wordLengthMapper() {
+        // TODO: Implement
+    }
+
+    // 3. Create Consumer that prints each element with index
+    public <T> Consumer<List<T>> indexedPrinter() {
+        // TODO: Implement
+    }
+
+    // 4. Create Supplier that generates unique IDs
+    public Supplier<String> uniqueIdGenerator() {
+        // TODO: Implement
+    }
+
+    // 5. Compose functions: add 1, then multiply by 2, then square
+    public Function<Integer, Integer> composedFunction() {
+        Function<Integer, Integer> addOne = x -> x + 1;
+        Function<Integer, Integer> multiplyByTwo = x -> x * 2;
+        Function<Integer, Integer> square = x -> x * x;
+
+        // TODO: Compose them
+    }
+}
+```
+
+---
+
+## 📝 BÀI TẬP 5: EXCEPTION HANDLING (2 giờ)
+
+### 5.1 Exception Handling Practice
+
+```java
+public class ExceptionHandlingExercises {
+
+    // 1. Implement division with proper exception handling
+    public static double safeDivide(double a, double b) {
+        // TODO: Handle division by zero
+    }
+
+    // 2. Implement file reader with try-with-resources
+    public static String readFile(String path) {
+        // TODO: Use try-with-resources
+        // Handle: FileNotFoundException, IOException
+    }
+
+    // 3. Create custom exception hierarchy
+    /*
+     * Create:
+     * - BankingException (base)
+     * - InsufficientFundsException
+     * - InvalidAccountException
+     * - TransactionFailedException
+     */
+
+    // 4. Implement ATM with exception handling
+    public class ATM {
+        private double balance;
+
+        public void withdraw(double amount) {
+            // TODO: Throw appropriate exceptions for:
+            // - Invalid amount (negative)
+            // - Insufficient funds
+            // - Daily limit exceeded
         }
 
-        public synchronized long getCount() {
-            return count;
+        public void deposit(double amount) {
+            // TODO: Validate amount
+        }
+
+        public void transfer(ATM target, double amount) {
+            // TODO: Handle transfer with proper exception handling
         }
     }
 
-    // Part 2: ReentrantLock
-    static class LockCounter {
-        private long count = 0;
+    // 5. Multi-catch practice
+    public void processInput(String input) {
+        // TODO: Parse input as integer
+        // Handle: NumberFormatException, NullPointerException
+        // Use multi-catch where appropriate
+    }
+}
+```
+
+---
+
+## 📝 BÀI TẬP 6: MULTITHREADING (5-6 giờ)
+
+### 6.1 Thread Basics
+
+```java
+public class ThreadExercises {
+
+    // 1. Create thread by extending Thread class
+    class MyThread extends Thread {
+        @Override
+        public void run() {
+            // TODO: Print numbers 1-10 with thread name
+        }
+    }
+
+    // 2. Create thread by implementing Runnable
+    class MyRunnable implements Runnable {
+        @Override
+        public void run() {
+            // TODO: Print numbers 1-10 with thread name
+        }
+    }
+
+    // 3. Create thread with lambda
+    public void createLambdaThread() {
+        // TODO: Create and start thread using lambda
+    }
+
+    // 4. Thread join example
+    public void demonstrateJoin() throws InterruptedException {
+        Thread t = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                System.out.println(i);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        t.start();
+        // TODO: Wait for thread to complete using join()
+    }
+
+    // 5. Thread daemon example
+    public void demonstrateDaemon() {
+        Thread daemon = new Thread(() -> {
+            while (true) {
+                System.out.println("Daemon running...");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        // TODO: Set as daemon and start
+    }
+}
+```
+
+---
+
+### 6.2 Synchronization Exercises
+
+```java
+public class SynchronizationExercises {
+
+    // 1. Thread-safe counter with synchronized
+    class SynchronizedCounter {
+        private int count = 0;
+
+        public synchronized void increment() {
+            // TODO: Implement
+        }
+
+        public synchronized int getCount() {
+            // TODO: Implement
+        }
+    }
+
+    // 2. Thread-safe counter with ReentrantLock
+    class LockCounter {
+        private int count = 0;
         private final ReentrantLock lock = new ReentrantLock();
 
         public void increment() {
-            lock.lock();
-            try {
-                count++;
-            } finally {
-                lock.unlock();
-            }
+            // TODO: Implement with lock.lock()/unlock()
         }
 
-        public long getCount() {
-            lock.lock();
-            try {
-                return count;
-            } finally {
-                lock.unlock();
-            }
+        public int getCount() {
+            // TODO: Implement
         }
     }
 
-    // Part 3: AtomicLong
-    static class AtomicCounter {
-        private AtomicLong count = new AtomicLong(0);
+    // 3. Thread-safe counter with AtomicInteger
+    class AtomicCounter {
+        private AtomicInteger count = new AtomicInteger(0);
 
         public void increment() {
-            count.incrementAndGet();
+            // TODO: Implement using AtomicInteger
         }
 
-        public long getCount() {
-            return count.get();
+        public int getCount() {
+            // TODO: Implement
         }
     }
 
-    // Part 4: Performance test
-    public static void main(String[] args) throws InterruptedException {
+    // 4. Performance comparison
+    public void comparePerformance() throws InterruptedException {
         int numThreads = 10;
-        int incrementsPerThread = 100_000;
+        int incrementsPerThread = 10000;
 
-        // Test SynchronizedCounter
-        testCounter(new SynchronizedCounter(), numThreads, incrementsPerThread, "Synchronized");
-
-        // Test LockCounter
-        testCounter(new LockCounter(), numThreads, incrementsPerThread, "ReentrantLock");
-
-        // Test AtomicCounter
-        testCounter(new AtomicCounter(), numThreads, incrementsPerThread, "AtomicLong");
+        // TODO: Test all 3 implementations
+        // Measure time taken for each
+        // Verify final count equals numThreads * incrementsPerThread
     }
 
-    private static void testCounter(ThreadSafeCounter counter, int numThreads,
-                                    int incrementsPerThread, String name) {
-        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-        CountDownLatch latch = new CountDownLatch(numThreads);
+    // 5. Producer-Consumer with wait/notify
+    class BoundedBuffer {
+        private final int[] buffer = new int[10];
+        private int count = 0;
+        private int in = 0;
+        private int out = 0;
 
-        long startTime = System.nanoTime();
-
-        for (int i = 0; i < numThreads; i++) {
-            executor.submit(() -> {
-                for (int j = 0; j < incrementsPerThread; j++) {
-                    counter.increment();
-                }
-                latch.countDown();
-            });
+        public synchronized void put(int item) throws InterruptedException {
+            // TODO: Wait while buffer is full
+            // Add item, notify consumers
         }
 
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        public synchronized int take() throws InterruptedException {
+            // TODO: Wait while buffer is empty
+            // Remove item, notify producers
         }
-
-        long endTime = System.nanoTime();
-        long duration = (endTime - startTime) / 1_000_000;  // ms
-
-        System.out.printf("%s: %d ms, final count = %d%n",
-            name, duration, counter.getCount());
-
-        executor.shutdown();
-    }
-}
-```
-
-### Cách submit
-
-```markdown
-## Kết quả Thread-Safe Counter
-
-### Performance comparison (10 threads, 100k increments each):
-
-| Implementation | Time (ms) | Correct? |
-|---------------|-----------|----------|
-| Synchronized  | XXX       | ✅ 1,000,000 |
-| ReentrantLock | XXX       | ✅ 1,000,000 |
-| AtomicLong    | XXX       | ✅ 1,000,000 |
-
-### Nhận xét:
-- Fastest: ...
-- Slowest: ...
-- Tại sao: ...
-```
-
----
-
-## 📝 BÀI TẬP 3: PRODUCER-CONSUMER (2 giờ)
-
-### Đề bài
-
-Implement Producer-Consumer pattern với:
-- BlockingQueue
-- Multiple producers
-- Multiple consumers
-- Graceful shutdown
-
-### Code template
-
-```java
-public class ProducerConsumerDemo {
-
-    private final BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(100);
-    private final int POISON_PILL = -1;
-
-    class Producer implements Runnable {
-        private final int id;
-
-        public Producer(int id) {
-            this.id = id;
-        }
-
-        @Override
-        public void run() {
-            try {
-                for (int i = 0; i < 100; i++) {
-                    int value = id * 1000 + i;
-                    queue.put(value);  // Block nếu queue đầy
-                    System.out.println("Producer " + id + " produced: " + value);
-                }
-                // Send poison pill to signal completion
-                queue.put(POISON_PILL);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
-
-    class Consumer implements Runnable {
-        private final int id;
-
-        public Consumer(int id) {
-            this.id = id;
-        }
-
-        @Override
-        public void run() {
-            try {
-                while (true) {
-                    int value = queue.take();  // Block nếu queue rỗng
-
-                    if (value == POISON_PILL) {
-                        // Re-add poison pill for other consumers
-                        queue.put(POISON_PILL);
-                        System.out.println("Consumer " + id + " stopping");
-                        break;
-                    }
-
-                    System.out.println("Consumer " + id + " consumed: " + value);
-                    // Process value...
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        ProducerConsumerDemo demo = new ProducerConsumerDemo();
-
-        ExecutorService executor = Executors.newFixedThreadPool(10);
-
-        // Start 3 producers
-        for (int i = 0; i < 3; i++) {
-            executor.submit(demo.new Producer(i));
-        }
-
-        // Start 5 consumers
-        for (int i = 0; i < 5; i++) {
-            executor.submit(demo.new Consumer(i));
-        }
-
-        executor.shutdown();
-        executor.awaitTermination(1, TimeUnit.MINUTES);
-    }
-}
-```
-
-### Bonus: Custom implementation với wait/notify
-
-```java
-public class CustomBlockingQueue<T> {
-
-    private final Queue<T> queue = new LinkedList<>();
-    private final int capacity;
-
-    public CustomBlockingQueue(int capacity) {
-        this.capacity = capacity;
-    }
-
-    public synchronized void put(T item) throws InterruptedException {
-        while (queue.size() == capacity) {
-            wait();  // Chờ cho đến khi queue không đầy
-        }
-
-        queue.add(item);
-        notifyAll();  // Notify consumers
-    }
-
-    public synchronized T take() throws InterruptedException {
-        while (queue.isEmpty()) {
-            wait();  // Chờ cho đến khi queue không rỗng
-        }
-
-        T item = queue.poll();
-        notifyAll();  // Notify producers
-        return item;
     }
 }
 ```
 
 ---
 
-## 📝 BÀI TẬP 4: STREAM API PRACTICE (1 giờ)
-
-### Đề bài
-
-Cho list employees:
+### 6.3 ExecutorService Exercises
 
 ```java
+public class ExecutorServiceExercises {
+
+    // 1. Create fixed thread pool and submit tasks
+    public void fixedThreadPool() {
+        ExecutorService executor = Executors.newFixedThreadPool(5);
+
+        // TODO: Submit 10 tasks, each prints thread name
+        // Shutdown executor properly
+    }
+
+    // 2. Submit Callable and get result
+    public void callableExample() throws Exception {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        Callable<String> task = () -> {
+            Thread.sleep(1000);
+            return "Hello from Callable!";
+        };
+
+        // TODO: Submit and get result using Future
+    }
+
+    // 3. Invoke all tasks and wait for completion
+    public void invokeAllExample() throws Exception {
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+
+        List<Callable<Integer>> tasks = Arrays.asList(
+            () -> { Thread.sleep(1000); return 1; },
+            () -> { Thread.sleep(2000); return 2; },
+            () -> { Thread.sleep(3000); return 3; }
+        );
+
+        // TODO: Use invokeAll and process results
+    }
+
+    // 4. Find first completed task
+    public void invokeAnyExample() throws Exception {
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+
+        List<Callable<String>> tasks = Arrays.asList(
+            () -> { Thread.sleep(3000); return "Slow"; },
+            () -> { Thread.sleep(1000); return "Fast"; },
+            () -> { Thread.sleep(2000); return "Medium"; }
+        );
+
+        // TODO: Use invokeAny to get fastest result
+    }
+
+    // 5. Scheduled executor
+    public void scheduledExecutor() {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+        // TODO: Schedule task to run every 2 seconds, 5 times
+        // Shutdown after completion
+    }
+}
+```
+
+---
+
+### 6.4 CompletableFuture Exercises
+
+```java
+public class CompletableFutureExercises {
+
+    // 1. Simple async operation
+    public CompletableFuture<String> fetchData() {
+        return CompletableFuture.supplyAsync(() -> {
+            // Simulate API call
+            try { Thread.sleep(1000); } catch (InterruptedException e) {}
+            return "Data";
+        });
+    }
+
+    // 2. Transform result
+    public CompletableFuture<String> processData() {
+        return fetchData()
+            // TODO: Transform "Data" to "Processed: Data"
+    }
+
+    // 3. Handle exception
+    public CompletableFuture<String> fetchDataWithFallback() {
+        return CompletableFuture.supplyAsync(() -> {
+            throw new RuntimeException("API Error");
+        })
+        // TODO: Return "Default data" on error
+        ;
+    }
+
+    // 4. Combine two futures
+    public CompletableFuture<String> combineFutures() {
+        CompletableFuture<String> future1 = CompletableFuture.supplyAsync(() -> "Hello");
+        CompletableFuture<String> future2 = CompletableFuture.supplyAsync(() -> "World");
+
+        // TODO: Combine to get "Hello World"
+    }
+
+    // 5. Execute multiple futures and wait for all
+    public CompletableFuture<Void> fetchMultiple() {
+        CompletableFuture<String> f1 = fetchData();
+        CompletableFuture<String> f2 = fetchData();
+        CompletableFuture<String> f3 = fetchData();
+
+        // TODO: Wait for all to complete
+    }
+
+    // 6. Real-world scenario: Order processing
+    public CompletableFuture<OrderResult> processOrder(String orderId) {
+        // TODO: Implement async order processing:
+        // 1. Fetch order details (async)
+        // 2. Check inventory (async, parallel)
+        // 3. Process payment (after 1 & 2 complete)
+        // 4. Send confirmation email (async)
+        // 5. Handle errors at each step
+    }
+}
+```
+
+---
+
+## 📝 BÀI TẬP 7: FILE I/O & NIO (2-3 giờ)
+
+### 7.1 File Operations
+
+```java
+public class FileIOExercises {
+
+    // 1. Read file content
+    public static String readFile(String path) throws IOException {
+        // TODO: Use Files.readString()
+    }
+
+    // 2. Write file content
+    public static void writeFile(String path, String content) throws IOException {
+        // TODO: Use Files.writeString()
+    }
+
+    // 3. Read file line by line
+    public static List<String> readLines(String path) throws IOException {
+        // TODO: Use Files.readAllLines()
+    }
+
+    // 4. Copy file
+    public static void copyFile(String source, String dest) throws IOException {
+        // TODO: Use Files.copy()
+    }
+
+    // 5. Walk directory tree
+    public static List<Path> findAllFiles(Path startDir, String extension) throws IOException {
+        // TODO: Use Files.walk() and filter by extension
+    }
+
+    // 6. Read file using Stream API
+    public static Stream<String> streamLines(String path) throws IOException {
+        // TODO: Use Files.lines()
+    }
+
+    // 7. Write with BufferedWriter
+    public static void writeLargeFile(String path, List<String> lines) throws IOException {
+        // TODO: Use try-with-resources with BufferedWriter
+    }
+}
+```
+
+---
+
+## 📝 BÀI TẬP 8: DATE & TIME (2 giờ)
+
+### 8.1 Java 8 Date/Time API
+
+```java
+public class DateTimeExercises {
+
+    // 1. Get current date, time, and datetime
+    public static void getCurrentDateTime() {
+        // TODO: Use LocalDate, LocalTime, LocalDateTime
+    }
+
+    // 2. Create specific date
+    public static LocalDate createSpecificDate() {
+        // TODO: Create date for January 15, 2024
+    }
+
+    // 3. Parse date from string
+    public static LocalDate parseDate(String dateString) {
+        // TODO: Parse "2024-01-15" format
+    }
+
+    // 4. Format date to string
+    public static String formatDate(LocalDate date) {
+        // TODO: Format to "dd/MM/yyyy"
+    }
+
+    // 5. Calculate age from birthdate
+    public static int calculateAge(LocalDate birthDate) {
+        // TODO: Use Period.between()
+    }
+
+    // 6. Add/subtract time
+    public static LocalDate addDays(LocalDate date, int days) {
+        // TODO: Use plusDays/minusDays
+    }
+
+    // 7. Find days between two dates
+    public static long daysBetween(LocalDate d1, LocalDate d2) {
+        // TODO: Use ChronoUnit.DAYS.between()
+    }
+
+    // 8. Check if date is before/after another
+    public static boolean isBefore(LocalDate d1, LocalDate d2) {
+        // TODO: Use isBefore()
+    }
+
+    // 9. Get first/last day of month
+    public static LocalDate getFirstDayOfMonth(LocalDate date) {
+        // TODO: Use TemporalAdjusters
+    }
+
+    // 10. Work with timezones
+    public static ZonedDateTime convertTimezone(LocalDateTime dt, ZoneId targetZone) {
+        // TODO: Convert to target timezone
+    }
+}
+```
+
+---
+
+## 📝 BÀI TẬP 9: CAPSTONE PROJECT (8-10 giờ)
+
+### 9.1 Employee Management System
+
+**Đề bài:** Build a complete employee management system combining all concepts
+
+```java
+// Requirements:
+// 1. Employee class with proper encapsulation
+// 2. Department enum with budget info
+// 3. Custom exceptions for business rules
+// 4. Thread-safe employee repository
+// 5. Stream-based reporting
+// 6. File-based persistence
+// 7. Async operations for reports
+
+// TODO: Implement the following:
+
+enum Department {
+    IT(100000),
+    HR(50000),
+    FINANCE(75000),
+    MARKETING(60000);
+
+    private final double budget;
+    // Constructor, getter
+}
+
 class Employee {
-    String name;
-    int age;
-    String department;
-    double salary;
-    LocalDate joinDate;
+    private String id;
+    private String name;
+    private Department department;
+    private double salary;
+    private LocalDate hireDate;
 
-    // Constructor, getters
+    // TODO: Constructor, getters, setters, toString, equals, hashCode
 }
 
-List<Employee> employees = Arrays.asList(
-    new Employee("John", 30, "IT", 50000, LocalDate.of(2020, 1, 1)),
-    new Employee("Jane", 25, "HR", 45000, LocalDate.of(2021, 6, 1)),
-    new Employee("Bob", 35, "IT", 60000, LocalDate.of(2019, 3, 15)),
-    new Employee("Alice", 28, "Finance", 55000, LocalDate.of(2022, 2, 1)),
-    // ... thêm employees
-);
-```
+class EmployeeRepository {
+    // TODO: Thread-safe repository using ConcurrentHashMap
+    // Methods: add, remove, findById, findAll
+}
 
-**Yêu cầu:**
+class EmployeeService {
+    private EmployeeRepository repository;
 
-```java
-// 1. Tìm employees trong IT department
-List<Employee> itEmployees = employees.stream()
-    .filter(e -> e.getDepartment().equals("IT"))
-    .collect(Collectors.toList());
+    // TODO: Implement business logic:
+    // - hireEmployee (validate department budget)
+    // - terminateEmployee
+    // - giveRaise (with validation)
+    // - transferDepartment
 
-// 2. Tính average salary của tất cả employees
-double avgSalary = employees.stream()
-    .collect(Collectors.averagingDouble(Employee::getSalary));
+    // TODO: Implement reporting using Stream API:
+    // - getAverageSalaryByDepartment
+    // - getEmployeesHiredInYear
+    // - getTotalBudgetUsage
+}
 
-// 3. Group employees by department
-Map<String, List<Employee>> byDept = employees.stream()
-    .collect(Collectors.groupingBy(Employee::getDepartment));
+class ReportService {
+    private EmployeeService employeeService;
 
-// 4. Tìm employee có salary cao nhất mỗi department
-Map<String, Optional<Employee>> maxSalaryByDept = employees.stream()
-    .collect(Collectors.groupingBy(
-        Employee::getDepartment,
-        Collectors.maxBy(Comparator.comparingDouble(Employee::getSalary))
-    ));
+    // TODO: Generate async reports:
+    // - generateAnnualReport (returns CompletableFuture)
+    // - exportToCSV (writes to file)
+    // - sendReportByEmail (simulated)
+}
 
-// 5. Tính total salary cost mỗi department
-Map<String, Double> totalSalaryByDept = employees.stream()
-    .collect(Collectors.groupingBy(
-        Employee::getDepartment,
-        Collectors.summingDouble(Employee::getSalary)
-    ));
-
-// 6. Tìm 3 employees có salary cao nhất
-List<Employee> top3Earners = employees.stream()
-    .sorted(Comparator.comparingDouble(Employee::getSalary).reversed())
-    .limit(3)
-    .collect(Collectors.toList());
-
-// 7. Kiểm tra tất cả employees có age >= 18 không
-boolean allAdults = employees.stream()
-    .allMatch(e -> e.getAge() >= 18);
-
-// 8. Tìm employee trẻ nhất
-Optional<Employee> youngest = employees.stream()
-    .min(Comparator.comparingInt(Employee::getAge));
-
-// 9. Partition employees thành 2 groups: salary > 50000 và <= 50000
-Map<Boolean, List<Employee>> byHighSalary = employees.stream()
-    .collect(Collectors.partitioningBy(e -> e.getSalary() > 50000));
-
-// 10. Join tất cả employee names với comma
-String allNames = employees.stream()
-    .map(Employee::getName)
-    .collect(Collectors.joining(", "));
+// Main application
+public class EmployeeManagementSystem {
+    public static void main(String[] args) {
+        // TODO: Create demo with:
+        // 1. Initialize repository with sample data
+        // 2. Perform CRUD operations
+        // 3. Generate reports
+        // 4. Handle exceptions properly
+        // 5. Use async operations for reports
+    }
+}
 ```
 
 ---
 
-## ✅ CHECKLIST HOÀN THÀNH PHASE 0
+## ✅ CHECKLIST HOÀN THÀNH
 
-- [ ] Implement được HashMap từ scratch
-- [ ] Hiểu hashCode() và equals() contract
-- [ ] Phân biệt được các thread-safe collections
-- [ ] Implement được Producer-Consumer
-- [ ] Thành thạo Stream API operations
-- [ ] Dùng đúng Optional patterns
-- [ ] Hiểu JVM memory structure
-- [ ] Nhận diện được memory leaks
+Sau khi hoàn thành Phase 0, bạn sẽ:
+
+- [ ] Thành thạo Java syntax và OOP
+- [ ] Hiểu sâu Collections Framework
+- [ ] Sử dụng thành thạo Stream API & Lambda
+- [ ] Xử lý exception đúng cách
+- [ ] Implement được multithreading cơ bản
+- [ ] Làm việc với File I/O và NIO.2
+- [ ] Sử dụng Java 8+ Date/Time API
+- [ ] Build được application hoàn chỉnh
 
 ---
 
 ## 📤 CÁCH SUBMIT
 
-1. Push code lên GitHub
-2. Tạo file `PHASE0_REPORT.md` với:
-   - Link GitHub
-   - Kết quả performance test
+1. Push code lên GitHub repository
+2. Tạo file `PHASE0_SOLUTIONS.md` với:
+   - Link đến GitHub
+   - Giải pháp cho mỗi bài tập
    - Những gì học được
    - Khó khăn gặp phải
+
+3. Submit qua PR hoặc share link trong team chat
+
+---
+
+## 🎯 ĐÁNH GIÁ
+
+| Tiêu chí | Điểm tối đa |
+|----------|-------------|
+| Correctness (code chạy đúng) | 40% |
+| Code quality (clean code) | 20% |
+| Exception handling | 15% |
+| Thread safety | 15% |
+| Documentation (comments) | 10% |
 
 ---
 
 ## 🔜 SAU KHI HOÀN THÀNH
 
-Submit xong, tôi sẽ review và unlock Phase 1: Spring Boot Core!
+Sau Phase 0, bạn sẽ sẵn sàng cho:
+- **Phase 1:** Spring Boot Core
+- **Phase 2:** Database & JPA
+- **Phase 3:** Microservices Patterns
+
+Good luck! 🚀
