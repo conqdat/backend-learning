@@ -26,6 +26,9 @@ ROADMAPS = [
     "system-design",
     "git-github",
     "cloudflare",
+    "elasticsearch",
+    "linux",
+    "aws-best-practices",
 ]
 
 def fetch_roadmap_from_github(roadmap_name):

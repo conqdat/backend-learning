@@ -1,7 +1,9 @@
-# Phase 7: Production Ready - Lý Thuyết
+# Phase 06.4: DevOps - Production Ready
 
 > **Thời gian:** 3 tuần
 > **Mục tiêu:** Monitoring, logging, debugging production issues
+>
+> **Tham khảo:** [roadmap.sh/devops](https://roadmap.sh/devops)
 
 ---
 
@@ -245,13 +247,388 @@ public class OrderService {
 
 ---
 
-## 📝 TÓM TẮT PHASE 7
+## 📝 TÓM TẮT PHASE 06.4
 
 1. ✅ 3 pillars of observability
 2. ✅ Four golden signals
 3. ✅ Structured logging với correlation IDs
 4. ✅ Circuit breaker pattern
 5. ✅ Incident response runbooks
+
+---
+
+## 📚 BÀI 6: CI/CD PIPELINE
+
+### 6.1 CI/CD Concepts
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    CI/CD PIPELINE                            │
+├─────────────────────────────────────────────────────────────┤
+│  CONTINUOUS INTEGRATION                                      │
+│  - Developers commit code frequently                         │
+│  - Automated build + test on each commit                     │
+│  - Catch issues early                                        │
+├─────────────────────────────────────────────────────────────┤
+│  CONTINUOUS DELIVERY                                         │
+│  - Code is always in deployable state                        │
+│  - Automated deployment to staging                           │
+│  - Manual approval for production                            │
+├─────────────────────────────────────────────────────────────┤
+│  CONTINUOUS DEPLOYMENT                                       │
+│  - Every change that passes tests → production               │
+│  - No manual intervention                                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 6.2 GitHub Actions Pipeline
+
+```yaml
+# .github/workflows/ci-cd.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  JAVA_VERSION: '17'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Run unit tests
+        run: mvn test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results
+          path: target/surefire-reports/
+
+  code-quality:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run SonarQube
+        run: mvn -B sonar:sonar
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: [build, code-quality]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl set image deployment/app app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          kubectl rollout status deployment/app
+```
+
+---
+
+## 📚 BÀI 7: INFRASTRUCTURE AS CODE
+
+### 7.1 Terraform Basics
+
+```hcl
+# main.tf
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+# VPC
+resource "aws_vpc" "main" {
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+
+  tags = {
+    Name        = "main-vpc"
+    Environment = "production"
+  }
+}
+
+# Public Subnet
+resource "aws_subnet" "public" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "us-east-1a"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "public-subnet-1a"
+  }
+}
+
+# Internet Gateway
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "main-igw"
+  }
+}
+
+# Security Group
+resource "aws_security_group" "app" {
+  name        = "app-sg"
+  description = "Security group for application"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# EC2 Instance
+resource "aws_instance" "app" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t3.medium"
+  subnet_id     = aws_subnet.public.id
+
+  vpc_security_group_ids = [aws_security_group.app.id]
+
+  user_data = <<-EOF
+              #!/bin/bash
+              yum update -y
+              yum install -y docker
+              systemctl start docker
+              systemctl enable docker
+              EOF
+
+  tags = {
+    Name        = "app-server"
+    Environment = "production"
+  }
+}
+
+# Outputs
+output "vpc_id" {
+  value       = aws_vpc.main.id
+  description = "VPC ID"
+}
+
+output "instance_public_ip" {
+  value       = aws_instance.app.public_ip
+  description = "Public IP of the instance"
+}
+```
+
+### 7.2 Terraform Commands
+
+```bash
+# Initialize Terraform
+terraform init
+
+# Validate configuration
+terraform validate
+
+# Format configuration
+terraform fmt
+
+# Plan changes
+terraform plan
+terraform plan -out=tfplan
+terraform plan -destroy
+
+# Apply changes
+terraform apply
+terraform apply tfplan
+terraform apply -auto-approve
+
+# Destroy infrastructure
+terraform destroy
+
+# State management
+terraform state list
+terraform state show aws_instance.app
+terraform import aws_instance.app i-1234567890abcdef0
+terraform refresh
+
+# Workspace (environments)
+terraform workspace new dev
+terraform workspace new prod
+terraform workspace select dev
+```
+
+---
+
+## 📚 BÀI 8: CONTAINER ORCHESTRATION
+
+### 8.1 Kubernetes vs Alternatives
+
+| Tool | Description | Use Case |
+|------|-------------|----------|
+| Kubernetes | Full-featured orchestration | Production, complex apps |
+| Docker Swarm | Simple, Docker-native | Small teams, simple apps |
+| Nomad | Flexible, HashiCorp ecosystem | Mixed workloads |
+| ECS | AWS-managed | AWS-native teams |
+| EKS | AWS-managed K8s | Need K8s on AWS |
+| AKS | Azure-managed K8s | Need K8s on Azure |
+| GKE | GCP-managed K8s | Need K8s on GCP |
+
+### 8.2 When NOT to Use Kubernetes
+
+```
+❌ DON'T use Kubernetes if:
+- You have a single application
+- Your team is < 5 people
+- You don't have DevOps expertise
+- Your application doesn't need scaling
+- You're just starting with containers
+- Cost is a major concern
+
+✅ DO use Kubernetes if:
+- You have microservices architecture
+- You need auto-scaling
+- You have complex deployment requirements
+- You need multi-cloud portability
+- You have dedicated DevOps team
+```
+
+---
+
+## 📚 BÀI 9: SECRETS MANAGEMENT
+
+### 9.1 Secrets Management Options
+
+| Tool | Description | Use Case |
+|------|-------------|----------|
+| AWS Secrets Manager | Managed AWS service | AWS-native apps |
+| HashiCorp Vault | Open source, self-hosted | Multi-cloud, on-prem |
+| Sealed Secrets | Kubernetes-native | K8s workloads |
+| Doppler | Developer-focused | Teams wanting simplicity |
+| AWS Parameter Store | Simple key-value | Non-sensitive config |
+
+### 9.2 Spring Boot Integration
+
+```yaml
+# application.yml
+spring:
+  config:
+    import: optional:vault://
+  cloud:
+    vault:
+      authentication: APPROLE
+      host: vault.example.com
+      port: 8200
+      scheme: https
+      app-role:
+        role-id: ${VAULT_ROLE_ID}
+        secret-id: ${VAULT_SECRET_ID}
+```
+
+```java
+@Configuration
+public class VaultConfig {
+
+    @Bean
+    public VaultTemplate vaultTemplate() {
+        VaultEndpoint vaultEndpoint = VaultEndpoint.create("vault.example.com", 8200);
+        vaultEndpoint.setScheme("https");
+
+        RestTemplate restTemplate = new RestTemplate();
+        return new VaultTemplate(vaultEndpoint, restTemplate);
+    }
+}
+
+@Service
+public class DatabaseService {
+
+    @Value("${database.password}")
+    private String dbPassword;
+
+    // Password injected from Vault at runtime
+}
+```
 
 ---
 

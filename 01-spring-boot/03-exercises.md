@@ -1,146 +1,137 @@
-# Phase 1: Spring Boot Core - Bài Tập Thực Hành
+# Phase 1: Spring Boot Core Mastery - Bài Tập Thực Hành
 
-> **Thời gian:** 4-6 giờ
-> **Đầu ra:** Code submit lên GitHub hoặc gửi file cho mentor review
+> **Thời gian:** 1-2 tuần
+> **Đầu ra:** Code submit lên GitHub hoặc gửi cho mentor review
 
 ---
 
-## 📝 BÀI TẬP 1: PHÂN TÍCH DEPENDENCIES (30 phút)
+## 📝 BÀI TẬP 1: PHÂN TÍCH SPRING BOOT STARTERS (30 phút)
 
 ### Đề bài
 
-Vào project Spring Boot bạn đang làm việc (hoặc clone project mẫu), thực hiện:
+1. Tạo project Spring Boot mới từ [start.spring.io](https://start.spring.io) với:
+   - Spring Web
+   - Spring Data JPA
+   - PostgreSQL Driver
+   - Spring Boot Actuator
+   - Lombok
 
-1. Chạy lệnh:
+2. Chạy lệnh xem dependency tree:
    ```bash
    mvn dependency:tree > deps.txt
    ```
 
-2. Trả lời các câu hỏi:
+3. Trả lời câu hỏi:
 
-   **a)** Project có bao nhiêu `spring-boot-starter-*` dependencies?
+   **a)** `spring-boot-starter-web` kéo theo những dependencies gì?
    ```
-   Gợi ý: grep "spring-boot-starter" deps.txt
-   ```
-
-   **b)** `spring-boot-starter-web` kéo theo những dependencies gì quan trọng?
-   ```
-   - Tomcat version: ?
-   - Jackson version: ?
-   - Spring Web version: ?
+   - Embedded server: ? (Tomcat/Jetty/Undertow)
+   - JSON library: ? (Jackson version)
+   - Spring MVC version: ?
+   - Validation library: ?
    ```
 
-   **c)** Có dependency nào bị conflict version không?
+   **b)** `spring-boot-starter-data-jpa` kéo theo những gì?
    ```
-   Gợi ý: Tìm các dòng có "omitted for conflict with"
+   - ORM framework: ? (Hibernate version)
+   - Connection pool: ? (HikariCP)
+   - Spring Data JPA version: ?
    ```
 
-   **d)** Nếu muốn upgrade Jackson lên 2.16.0, làm thế nào?
+   **c)** Có bao nhiêu total dependencies trong project?
 
 ### Cách submit
 
 ```markdown
 ## Kết quả phân tích dependencies
 
-### a) Số lượng starters
-- spring-boot-starter-web
-- spring-boot-starter-data-jpa
-- ... (liệt kê)
+### a) spring-boot-starter-web dependencies
+- Embedded server: Tomcat 10.1.16
+- JSON library: Jackson 2.15.3
+- Spring MVC: Spring Web 6.1.1
+- Validation: hibernate-validator 8.0.1
 
-### b) Dependencies quan trọng từ spring-boot-starter-web
-- Tomcat: 10.1.16
-- Jackson: 2.15.3
-- Spring Web: 6.1.1
+### b) spring-boot-starter-data-jpa dependencies
+- ORM: Hibernate 6.3.1.Final
+- Connection pool: HikariCP 5.0.1
+- Spring Data JPA: 3.2.0
 
-### c) Version conflicts
-- Found conflict: jackson-databind 2.15.3 vs 2.14.0
-- Resolution: ...
+### c) Total dependencies
+- Total: 85 dependencies
 
-### d) Upgrade Jackson
-Thêm vào pom.xml:
-<dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.16.0</version>
-</dependency>
+### Bài học rút ra
+- Starters giúp giảm đáng kể việc quản lý dependencies
+- Spring Boot parent POM quản lý version tự động
 ```
 
 ---
 
-## 📝 BÀI TẬP 2: DEBUG AUTO-CONFIGURATION (45 phút)
+## 📝 BÀI TẬP 2: TÌM HIỂU AUTO-CONFIGURATION (1 giờ)
 
 ### Đề bài
 
-1. Tạo project mới từ https://start.spring.io với dependencies:
-   - Spring Web
-   - Spring Data JPA
-   - PostgreSQL Driver
-   - Spring Boot Actuator
+1. Tạo project Spring Boot mới với `spring-boot-starter-web`
 
-2. Cấu hình để xem auto-configuration report:
-
+2. Thêm vào `application.yml`:
    ```yaml
-   # application.yml
    debug: true
-
-   management:
-     endpoints:
-       web:
-         exposure:
-           include: "*"
+   logging:
+     level:
+       org.springframework.boot.autoconfigure: DEBUG
    ```
 
-3. Chạy application và tìm log:
-   ```
-   CONDITIONS EVALUATION REPORT
-   ```
+3. Chạy application và tìm log `CONDITIONS EVALUATION REPORT`
 
-4. Chọn 3 auto-configuration classes và phân tích:
+4. Chọn 5 auto-configuration classes và phân tích:
 
-   | Class | Positive/Negative | Reason |
-   |-------|------------------|--------|
-   | `DataSourceAutoConfiguration` | Positive | found required class 'javax.sql.DataSource' |
-   | `HibernateJpaAutoConfiguration` | ? | ? |
-   | `RedisAutoConfiguration` | ? | ? |
+   | Class | Matched? | Reason |
+   |-------|----------|--------|
+   | `WebMvcAutoConfiguration` | ✅ Yes | Web application detected |
+   | `HttpEncodingAutoConfiguration` | ✅ Yes | CharacterEncodingFilter class found |
+   | `RedisAutoConfiguration` | ❌ No | RedisTemplate class not found |
+   | `SecurityAutoConfiguration` | ❌ No | spring-security not in classpath |
+   | `...` | ... | ... |
 
-5. Thử disable `SecurityAutoConfiguration` và restart app
+5. Thử disable `WebMvcAutoConfiguration` và xem điều gì xảy ra
 
 ### Cách submit
 
 ```markdown
 ## Kết quả debug auto-configuration
 
-### 3 auto-configuration classes phân tích
+### 5 auto-configuration classes phân tích
 
-#### 1. DataSourceAutoConfiguration
+#### 1. WebMvcAutoConfiguration
 - Status: ✅ Positive (matched)
-- Reason: found required class 'javax.sql.DataSource'
+- Reason: Web application detected, DispatcherServlet found
 - Conditions:
-  - OnClassCondition: matched
-  - OnPropertyCondition: matched (spring.datasource.url exists)
+  - OnClassCondition: matched (DispatcherServlet)
+  - OnWebApplicationCondition: matched (servlet web app)
 
-#### 2. HibernateJpaAutoConfiguration
-- Status: ...
+#### 2. HttpEncodingAutoConfiguration
+- Status: ✅ Positive
+- Reason: CharacterEncodingFilter class found
+- ...
 
 #### 3. RedisAutoConfiguration
-- Status: ...
+- Status: ❌ Negative
+- Reason: RedisTemplate class not in classpath
+- ...
 
-### Thử disable SecurityAutoConfiguration
+### Thử disable WebMvcAutoConfiguration
 
-Cách làm:
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
+Code:
+@SpringBootApplication(exclude = {WebMvcAutoConfiguration.class})
 
-Hoặc trong application.yml:
-spring:
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-
-Kết quả: ...
+Kết quả:
+- Application vẫn chạy nhưng không có MVC endpoints
+- Whitelabel error page hiển thị
+- Bài học: Auto-configuration rất quan trọng!
 ```
 
 ---
 
-## 📝 BÀI TẬP 3: TẠO CUSTOM STARTER - GREETING SERVICE (2 giờ)
+## 📝 BÀI TẬP 3: TẠO CUSTOM STARTER - GREETING SERVICE (3-4 giờ)
 
 ### Đề bài
 
@@ -198,19 +189,22 @@ Tạo custom starter `greeting-starter` với các yêu cầu:
 
 7. Thêm `GreetingHealthIndicator` cho actuator health endpoint
 
-8. Thêm test unit cho `GreetingService`
+8. Thêm unit test cho `GreetingService`
 
 ### Hướng dẫn từng bước
 
-#### Step 1: Tạo project
+#### Step 1: Tạo project structure
 
 ```bash
 mkdir greeting-starter
 cd greeting-starter
-mvn archetype:generate -DgroupId=com.example -DartifactId=greeting-starter -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+
+# Tạo cấu trúc thư mục
+mkdir -p src/main/java/com/example/greeting
+mkdir -p src/main/resources/META-INF/spring
 ```
 
-#### Step 2: Sửa pom.xml
+#### Step 2: Tạo pom.xml
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -236,7 +230,7 @@ mvn archetype:generate -DgroupId=com.example -DartifactId=greeting-starter -Darc
             <version>3.2.0</version>
         </dependency>
 
-        <!-- Spring Boot Configuration Processor (cho autocomplete) -->
+        <!-- Configuration Processor (cho autocomplete) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -244,7 +238,7 @@ mvn archetype:generate -DgroupId=com.example -DartifactId=greeting-starter -Darc
             <optional>true</optional>
         </dependency>
 
-        <!-- Spring Boot Starter Web (provided - user sẽ add) -->
+        <!-- Spring Boot Starter Web (provided) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -260,20 +254,6 @@ mvn archetype:generate -DgroupId=com.example -DartifactId=greeting-starter -Darc
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
 ```
 
@@ -287,45 +267,18 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "greeting")
 public class GreetingProperties {
 
-    /**
-     * Enable/disable greeting service
-     */
     private boolean enabled = true;
-
-    /**
-     * Greeting message template
-     */
     private String message = "Hello";
-
-    /**
-     * Suffix to append after name
-     */
     private String suffix = "!";
 
-    // Getters and Setters
-    public boolean isEnabled() {
-        return enabled;
-    }
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getSuffix() {
-        return suffix;
-    }
-
-    public void setSuffix(String suffix) {
-        this.suffix = suffix;
-    }
+    public String getSuffix() { return suffix; }
+    public void setSuffix(String suffix) { this.suffix = suffix; }
 }
 ```
 
@@ -344,13 +297,6 @@ public class GreetingService {
         this.properties = properties;
     }
 
-    /**
-     * Create greeting message for given name
-     *
-     * @param name person name
-     * @return greeting message like "Hello John!"
-     * @throws IllegalStateException if service is disabled
-     */
     public String greet(String name) {
         if (!properties.isEnabled()) {
             throw new IllegalStateException("Greeting service is disabled");
@@ -387,7 +333,8 @@ public class GreetingAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = "greeting", name = "enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "greeting", name = "enabled",
+                          havingValue = "true", matchIfMissing = true)
     public GreetingService greetingService(GreetingProperties properties) {
         return new GreetingService(properties);
     }
@@ -396,9 +343,8 @@ public class GreetingAutoConfiguration {
 
 #### Step 6: Tạo file register auto-configuration
 
-Tạo file: `src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`
+File: `src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`
 
-Nội dung:
 ```
 com.example.greeting.GreetingAutoConfiguration
 ```
@@ -414,10 +360,10 @@ mvn clean install
 ```bash
 mkdir greeting-demo
 cd greeting-demo
-# Tạo project Spring Boot mới từ start.spring.io
+# Tạo Spring Boot project mới
 ```
 
-Thêm dependency vào pom.xml:
+Thêm dependency:
 ```xml
 <dependency>
     <groupId>com.example</groupId>
@@ -426,7 +372,7 @@ Thêm dependency vào pom.xml:
 </dependency>
 ```
 
-Cấu hình trong application.yml:
+Cấu hình:
 ```yaml
 greeting:
   enabled: true
@@ -434,7 +380,7 @@ greeting:
   suffix: "!"
 ```
 
-Tạo controller test:
+Controller test:
 ```java
 @RestController
 @RequestMapping("/api")
@@ -482,31 +428,399 @@ https://github.com/yourusername/greeting-starter
 6. ✅ Test thành công
 
 ### Bonus (nếu có)
-- [ ] GreetingController với endpoint /greet/{name}
-- [ ] GreetingHealthIndicator
-- [ ] Unit tests
+- ✅ GreetingController với endpoint /greet/{name}
+- ✅ GreetingHealthIndicator
+- ✅ Unit tests
 
 ### Khó khăn gặp phải
-- Vấn đề 1: ...
-- Cách giải quyết: ...
+- Vấn đề: File .imports không được nhận diện
+- Cách giải quyết: Kiểm tra lại path META-INF/spring/
 
 ### Bài học rút ra
-- ...
+- Hiểu cách auto-configuration hoạt động
+- Biết cách tạo custom starter cho team
 ```
 
 ---
 
-## 📝 BÀI TẬP 4: ACTUATOR HEALTH CUSTOM (1 giờ)
+## 📝 BÀI TẬP 4: XÂY DỰNG REST API (4-5 giờ)
 
 ### Đề bài
 
-1. Thêm Actuator vào project hiện tại:
-   ```xml
-   <dependency>
-       <groupId>org.springframework.boot</groupId>
-       <artifactId>spring-boot-starter-actuator</artifactId>
-   </dependency>
+Xây dựng REST API cho **Product Management** với các yêu cầu:
+
+#### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/products` | List products (pagination) |
+| GET | `/api/products/{id}` | Get product by ID |
+| POST | `/api/products` | Create product |
+| PUT | `/api/products/{id}` | Update product |
+| DELETE | `/api/products/{id}` | Delete product |
+| GET | `/api/products/search` | Search products by name |
+
+#### Entity: Product
+
+```java
+@Entity
+@Table(name = "products")
+public class Product {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false, unique = true)
+    private String sku;
+
+    private String description;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
+
+    @Column(nullable = false)
+    private Integer stock = 0;
+
+    @Enumerated(EnumType.STRING)
+    private ProductStatus status = ProductStatus.ACTIVE;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+}
+
+enum ProductStatus {
+    ACTIVE, INACTIVE, OUT_OF_STOCK
+}
+```
+
+#### DTOs
+
+```java
+// ProductCreateRequest
+public record ProductCreateRequest(
+    @NotBlank(message = "Name is required")
+    String name,
+
+    @NotBlank(message = "SKU is required")
+    String sku,
+
+    String description,
+
+    @NotNull(message = "Price is required")
+    @Positive(message = "Price must be positive")
+    BigDecimal price,
+
+    @NotNull(message = "Stock is required")
+    @Min(value = 0, message = "Stock cannot be negative")
+    Integer stock
+) {}
+
+// ProductUpdateRequest
+public record ProductUpdateRequest(
+    String name,
+    String sku,
+    String description,
+    @Positive BigDecimal price,
+    @Min(0) Integer stock
+) {}
+
+// ProductResponse
+public record ProductResponse(
+    Long id,
+    String name,
+    String sku,
+    String description,
+    BigDecimal price,
+    Integer stock,
+    ProductStatus status,
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt
+) {}
+```
+
+#### Yêu cầu bổ sung
+
+1. **Validation:**
+   - Name: required, min 2 characters
+   - SKU: required, unique
+   - Price: required, positive
+   - Stock: required, non-negative
+
+2. **Exception Handling:**
+   - 404 khi product không tồn tại
+   - 400 khi validation fail
+   - 409 khi SKU bị trùng
+   - 500 khi có lỗi server
+
+3. **Pagination:**
    ```
+   GET /api/products?page=0&size=10&sortBy=name&sortDir=asc
+   ```
+
+4. **Search:**
+   ```
+   GET /api/products/search?keyword=laptop
+   ```
+
+### Cách submit
+
+```markdown
+## Kết quả bài tập Product API
+
+### Link GitHub repository
+https://github.com/yourusername/product-api
+
+### API Documentation
+
+#### 1. List Products
+```bash
+curl http://localhost:8080/api/products?page=0&size=10
+```
+
+Response:
+```json
+{
+  "content": [...],
+  "page": 0,
+  "size": 10,
+  "totalElements": 100,
+  "totalPages": 10
+}
+```
+
+#### 2. Create Product
+```bash
+curl -X POST http://localhost:8080/api/products \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Laptop","sku":"LAP001","price":999.99,"stock":50}'
+```
+
+### Exception Handling
+- ResourceNotFoundException → 404
+- ValidationException → 400
+- DuplicateResourceException → 409
+
+### Tests
+- Unit tests: 15 tests passed
+- Integration tests: 8 tests passed
+
+### Bài học rút ra
+- Cách tổ chức layer: Controller → Service → Repository
+- Validation với @Valid và Bean Validation
+- Global exception handling với @RestControllerAdvice
+```
+
+---
+
+## 📝 BÀI TẬP 5: SPRING SECURITY + JWT (4-5 giờ)
+
+### Đề bài
+
+Implement JWT Authentication cho Product API:
+
+#### Yêu cầu
+
+1. **Đăng ký user:**
+   ```
+   POST /api/auth/register
+   Body: {
+     "email": "user@example.com",
+     "password": "password123",
+     "name": "John Doe"
+   }
+   ```
+
+2. **Đăng nhập:**
+   ```
+   POST /api/auth/login
+   Body: {
+     "email": "user@example.com",
+     "password": "password123"
+   }
+   Response: {
+     "token": "eyJhbGciOiJIUzI1NiIs...",
+     "expiresIn": 86400000
+   }
+   ```
+
+3. **Bảo vệ endpoints:**
+   - `/api/auth/**` → Public
+   - `/api/products` (GET) → Public
+   - `/api/products` (POST, PUT, DELETE) → Requires authentication
+   - `/api/admin/**` → Requires ADMIN role
+
+4. **JWT Token:**
+   - Secret key từ environment variable
+   - Expiration: 24 hours
+   - Include user email in claims
+
+### Hướng dẫn
+
+#### Step 1: Thêm dependencies
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+    <version>0.11.5</version>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-impl</artifactId>
+    <version>0.11.5</version>
+    <scope>runtime</scope>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.11.5</version>
+    <scope>runtime</scope>
+</dependency>
+```
+
+#### Step 2: Cấu hình security
+
+```java
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/products").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
+```
+
+#### Step 3: Implement JWT Filter
+
+```java
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    @Autowired
+    private JwtTokenProvider tokenProvider;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+        // Extract token from Authorization header
+        String token = extractToken(request);
+
+        if (token != null && tokenProvider.validateToken(token)) {
+            String email = tokenProvider.getEmail(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+            UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+
+        filterChain.doFilter(request, response);
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        String bearer = request.getHeader("Authorization");
+        if (bearer != null && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
+        }
+        return null;
+    }
+}
+```
+
+### Cách submit
+
+```markdown
+## Kết quả bài tập Spring Security + JWT
+
+### Link GitHub repository
+https://github.com/yourusername/product-api-security
+
+### Test Authentication Flow
+
+#### 1. Register
+```bash
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"password123","name":"Test User"}'
+```
+
+#### 2. Login
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"password123"}'
+```
+
+Response:
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiresIn": 86400000
+}
+```
+
+#### 3. Access Protected Endpoint
+```bash
+curl http://localhost:8080/api/products \
+  -H "Authorization: Bearer eyJhbGci..."
+```
+
+### Security Features
+- Password encoding với BCrypt
+- JWT token với 24h expiration
+- Role-based authorization
+- Stateless session
+
+### Bài học rút ra
+- Hiểu Spring Security filter chain
+- Cách implement JWT authentication
+- Role-based access control
+```
+
+---
+
+## 📝 BÀI TẬP 6: ACTUATOR & MONITORING (2 giờ)
+
+### Đề bài
+
+1. Thêm Actuator vào project Product API
 
 2. Cấu hình expose endpoints:
    ```yaml
@@ -514,25 +828,25 @@ https://github.com/yourusername/greeting-starter
      endpoints:
        web:
          exposure:
-           include: health,info,metrics
+           include: health,info,metrics,prometheus
      endpoint:
        health:
          show-details: always
    ```
 
-3. Tạo custom Health Indicator cho service bạn đang dùng (Database, Redis, hoặc External API):
-
+3. Tạo custom Health Indicator cho Database:
    ```java
    @Component
-   public class CustomHealthIndicator implements HealthIndicator {
-       @Override
-       public Health health() {
-           // Implement health check logic
-       }
+   public class DatabaseHealthIndicator implements HealthIndicator {
+       // Implement health check
    }
    ```
 
-4. Test endpoint `/actuator/health`
+4. Test endpoints:
+   ```bash
+   curl http://localhost:8080/actuator/health
+   curl http://localhost:8080/actuator/metrics
+   ```
 
 ### Cách submit
 
@@ -541,39 +855,172 @@ https://github.com/yourusername/greeting-starter
 
 ### Custom Health Indicator
 
-Tôi tạo health check cho: [Redis/Database/External API]
-
 Code:
 ```java
 @Component
-public class MyServiceHealthIndicator implements HealthIndicator {
-    // Code của bạn
-}
-```
+public class DatabaseHealthIndicator implements HealthIndicator {
+    @Autowired
+    private DataSource dataSource;
 
-### Test result
-
-```bash
-curl http://localhost:8080/actuator/health
-```
-
-Output:
-```json
-{
-    "status": "UP",
-    "components": {
-        "myService": {
-            "status": "UP",
-            "details": {
-                // Chi tiết
+    @Override
+    public Health health() {
+        try (Connection conn = dataSource.getConnection()) {
+            boolean valid = conn.isValid(1000);
+            if (valid) {
+                return Health.up().withDetail("database", "connected").build();
             }
+            return Health.down().withDetail("database", "connection invalid").build();
+        } catch (SQLException e) {
+            return Health.down(e).build();
         }
     }
 }
 ```
 
+### Test Results
+
+```bash
+curl http://localhost:8080/actuator/health
+```
+
+Response:
+```json
+{
+  "status": "UP",
+  "components": {
+    "db": {
+      "status": "UP",
+      "details": {
+        "database": "PostgreSQL",
+        "validationQuery": "SELECT 1"
+      }
+    },
+    "diskSpace": {
+      "status": "UP",
+      "details": {
+        "total": 500000000000,
+        "free": 200000000000,
+        "threshold": 10000000000
+      }
+    },
+    "database": {
+      "status": "UP",
+      "details": {
+        "database": "connected"
+      }
+    }
+  }
+}
+```
+
 ### Bài học rút ra
-- ...
+- Actuator cung cấp production-ready monitoring
+- Custom health indicators cho external services
+- Metrics export cho Prometheus/Grafana
+```
+
+---
+
+## 📝 BÀI TẬP 7: UNIT TESTING & INTEGRATION TESTING (3-4 giờ)
+
+### Đề bài
+
+Viết tests cho Product API:
+
+#### Unit Tests (Mockito)
+
+1. Test ProductService.create() với valid data
+2. Test ProductService.create() với invalid price (negative)
+3. Test ProductService.update() với product không tồn tại
+4. Test ProductService.delete() với product không tồn tại
+
+#### Integration Tests
+
+1. Test POST /api/products - Create success
+2. Test POST /api/products - Validation fail
+3. Test GET /api/products/{id} - Found
+4. Test GET /api/products/{id} - Not found
+5. Test PUT /api/products/{id} - Update success
+6. Test DELETE /api/products/{id} - Delete success
+
+### Cách submit
+
+```markdown
+## Kết quả bài tập Testing
+
+### Unit Tests
+
+```java
+@ExtendWith(MockitoExtension.class)
+class ProductServiceTest {
+
+    @Mock
+    private ProductRepository productRepository;
+
+    @InjectMocks
+    private ProductService productService;
+
+    @Test
+    void shouldCreateProductSuccessfully() {
+        // Given
+        ProductCreateRequest request = new ProductCreateRequest(
+            "Laptop", "LAP001", "Description", new BigDecimal("999.99"), 50
+        );
+        when(productRepository.save(any())).thenReturn(new Product());
+
+        // When
+        Product result = productService.create(request);
+
+        // Then
+        assertThat(result).isNotNull();
+        verify(productRepository).save(any());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenPriceNegative() {
+        // Given
+        ProductCreateRequest request = new ProductCreateRequest(
+            "Laptop", "LAP001", "Description", new BigDecimal("-100"), 50
+        );
+
+        // When/Then
+        assertThrows(ValidationException.class, () ->
+            productService.create(request)
+        );
+    }
+}
+```
+
+### Integration Tests
+
+```java
+@SpringBootTest
+@AutoConfigureMockMvc
+class ProductControllerIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void shouldCreateProduct() throws Exception {
+        mockMvc.perform(post("/api/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"Laptop\",\"sku\":\"LAP001\",\"price\":999.99,\"stock\":50}"))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.name").value("Laptop"));
+    }
+}
+```
+
+### Test Coverage
+- Unit tests: 10 tests, 100% pass
+- Integration tests: 6 tests, 100% pass
+- Code coverage: 85%
+
+### Bài học rút ra
+- Phân biệt unit test vs integration test
+- Sử dụng @MockBean trong integration tests
+- Test slices: @DataJpaTest, @WebMvcTest
 ```
 
 ---
@@ -589,7 +1036,10 @@ Sau khi làm xong bài tập, check xem bạn đã nắm được chưa:
 - [ ] Hiểu các @ConditionalOn* annotations
 - [ ] Biết cách override auto-configuration
 - [ ] Tạo được custom starter đơn giản
+- [ ] Xây dựng được REST API với validation
+- [ ] Implement được JWT authentication
 - [ ] Biết cấu hình và sử dụng Actuator endpoints
+- [ ] Viết được unit tests và integration tests
 
 ---
 
@@ -610,22 +1060,23 @@ Sau khi làm xong bài tập, check xem bạn đã nắm được chưa:
 
    Link GitHub: https://github.com/...
 
-   Những gì đã làm:
-   - Exercise 1: ✅
-   - Exercise 2: ✅
-   - Exercise 3: ✅
-   - Exercise 4: ✅
+   Bài tập đã làm:
+   - Exercise 1: ✅ Dependencies Analysis
+   - Exercise 2: ✅ Auto-Configuration Debug
+   - Exercise 3: ✅ Custom Starter
+   - Exercise 4: ✅ REST API
+   - Exercise 5: ✅ Spring Security + JWT
+   - Exercise 6: ✅ Actuator
+   - Exercise 7: ✅ Testing
 
    Khó khăn gặp phải: ...
    ```
-
-3. **Hoặc gửi file trực tiếp** nếu không muốn public code
 
 ---
 
 ## 🔜 SAU KHI HOÀN THÀNH
 
-Khi submit xong, tôi sẽ:
+Khi submit xong, mentor sẽ:
 1. Review code chi tiết
 2. Góp ý về coding style, best practices
 3. Giải đáp các câu hỏi

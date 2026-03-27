@@ -1,8 +1,296 @@
-# Phase 05.5: AWS Cloud - Lý Thuyết
+# AWS Cloud & Best Practices - Theory
 
 > **Thời gian:** 4 tuần
-> **Mục tiêu:** Master AWS services cho Backend Development
+> **Mục tiêu:** Master AWS services cho Backend Development, AWS Best Practices
 > **Certification target:** AWS Certified Developer Associate
+>
+> **Tham khảo:** [roadmap.sh/aws-best-practices](https://roadmap.sh/aws-best-practices)
+
+---
+
+## 📚 BÀI 0: AWS BEST PRACTICES FRAMEWORK
+
+### 0.1 Security Best Practices
+
+**IAM & Access Control:**
+```
+✅ DO:
+- Enable MFA for root account and IAM users
+- Use IAM roles instead of access keys for EC2/Lambda
+- Assign permissions to groups, not individual users
+- Apply least privilege principle
+- Rotate access keys regularly (90 days)
+- Use policy conditions (IP, MFA, time-based)
+- Use CloudTrail to keep an audit log
+- Set up automated security auditing
+
+❌ DON'T:
+- Share access keys between team members
+- Use root account for daily operations
+- Grant overly permissive policies (*:*)
+- Leave unused access keys active
+```
+
+**Data Protection:**
+```
+✅ DO:
+- Encrypt data at rest (KMS, S3 SSE, EBS encryption)
+- Encrypt data in transit (TLS/SSL everywhere)
+- Use VPC endpoints for private AWS service access
+- Enable S3 bucket versioning
+- Use AWS Secrets Manager for sensitive credentials
+
+❌ DON'T:
+- Store secrets in code or config files
+- Use HTTP for production traffic
+- Leave S3 buckets publicly accessible (unless intended)
+```
+
+---
+
+### 0.2 Development Best Practices
+
+**Application Design:**
+```
+✅ DO:
+- Do not store application state on servers (stateless design)
+- Use external stores for sessions (ElastiCache, DynamoDB)
+- Store extra information in your logs for debugging
+- Use the official AWS SDKs for AWS interactions
+- Have tools to view application logs in real-time
+- Design for failure (retry logic, circuit breakers)
+- Use environment variables for configuration
+
+❌ DON'T:
+- Rely on sticky sessions for state management
+- Store sessions in local memory/filesystem
+- Hardcode AWS credentials
+- Ignore CloudWatch logs
+```
+
+**Logging & Monitoring:**
+```
+✅ DO:
+- Use structured logging (JSON format)
+- Include correlation IDs for request tracing
+- Ship logs to CloudWatch Logs or S3
+- Set up log retention policies
+- Use X-Ray for distributed tracing
+
+❌ DON'T:
+- Log sensitive information (PII, credentials)
+- Store logs only on local disk
+- Ignore log rotation
+```
+
+---
+
+### 0.3 Operations Best Practices
+
+**Infrastructure Management:**
+```
+✅ DO:
+- Automate everything (Infrastructure as Code)
+- Use CloudFormation or Terraform
+- Use tags for resource organization
+- Use termination protection for critical instances
+- Use a VPC for network isolation
+- Lock down security groups (least privilege)
+- Deploy across multiple AZs for redundancy
+
+❌ DON'T:
+- Manually create resources in console
+- Use static/elastic IPs for servers
+- Keep unassociated Elastic IPs (costs money)
+- Use default security groups
+- Deploy single-AZ for production
+```
+
+**Scaling & High Availability:**
+```
+✅ DO:
+- Scale horizontally (add more instances)
+- Use Auto Scaling groups
+- Use ELB health checks instead of EC2 health checks
+- Scale down on INSUFFICIENT_DATA as well as ALARM
+- Use multiple AZs for all critical services
+- Be aware of AWS service limits before deployment
+
+❌ DON'T:
+- Scale vertically only (bigger instances)
+- Ignore scaling metrics
+- Use single point of failure
+```
+
+---
+
+### 0.4 Billing & Cost Optimization
+
+**Cost Management:**
+```
+✅ DO:
+- Set up granular billing alerts
+- Use Reserved Instances for steady-state workloads (up to 60% savings)
+- Use Spot Instances for batch/fault-tolerant workloads (up to 90% savings)
+- Right-size instances based on actual usage
+- Use S3 lifecycle policies for data tiering
+- Delete unused resources (EBS volumes, snapshots, Elastic IPs)
+- Use Cost Explorer to analyze spending
+
+❌ DON'T:
+- Leave resources running when not needed
+- Over-provision "just in case"
+- Ignore billing alerts
+- Use on-demand for everything
+```
+
+---
+
+### 0.5 S3 Best Practices
+
+```
+✅ DO:
+- Use "-" instead of "." in bucket names for SSL compatibility
+- Use random strings/prefixes at the start of keys for performance
+- Enable versioning for important buckets
+- Use lifecycle policies to transition old data to Glacier
+- Enable S3 server access logging
+- Use S3 Transfer Acceleration for global uploads
+
+❌ DON'T:
+- Use filesystem mounts (FUSE, etc.) for production
+- Store sensitive data without encryption
+- Leave buckets publicly accessible (unless intended)
+```
+
+---
+
+### 0.6 EC2 & VPC Best Practices
+
+```
+✅ DO:
+- Assign tags to everything (Name, Environment, Owner, CostCenter)
+- Use termination protection for non-auto-scaling instances
+- Use private subnets for application servers
+- Use NAT Gateway for private subnet outbound access
+- Use Security Groups (stateful) as primary firewall
+- Use NACLs (stateless) as secondary defense layer
+
+❌ DON'T:
+- SSH directly from internet (use bastion host)
+- Use public IPs for internal services
+- Leave security groups open to 0.0.0.0/0
+```
+
+---
+
+### 0.7 ELB (Elastic Load Balancer) Best Practices
+
+```
+✅ DO:
+- Terminate SSL on the load balancer
+- Pre-warm ELBs if expecting heavy traffic (contact AWS)
+- Use multiple AZs for load balancer
+- Enable access logs for debugging
+- Use health checks with appropriate thresholds
+
+❌ DON'T:
+- Use single AZ for load balancer
+- Ignore unhealthy target notifications
+```
+
+---
+
+### 0.8 RDS Best Practices
+
+```
+✅ DO:
+- Set up event subscriptions for failover notifications
+- Use Multi-AZ for production databases
+- Use Read Replicas for scaling read operations
+- Enable automated backups with appropriate retention
+- Use Parameter Groups for configuration management
+- Monitor FreeStorageSpace, CPU, connections
+
+❌ DON'T:
+- Use default credentials
+- Skip backup testing
+- Ignore storage capacity alerts
+```
+
+---
+
+### 0.9 ElastiCache Best Practices
+
+```
+✅ DO:
+- Use configuration endpoints instead of individual node endpoints
+- Use Multi-AZ for production caches
+- Monitor cache hit/miss ratios
+- Set appropriate TTL for cache entries
+
+❌ DON'T:
+- Use cache as primary data store
+- Cache everything without strategy
+```
+
+---
+
+### 0.10 Route53 Best Practices
+
+```
+✅ DO:
+- Use ALIAS records instead of CNAME for root domains
+- Use health checks with DNS failover
+- Use latency-based routing for global apps
+- Enable DNSSEC for domain security
+
+❌ DON'T:
+- Use CNAME for root domain (@)
+- Skip health checks for critical services
+```
+
+---
+
+### 0.11 CloudWatch Best Practices
+
+```
+✅ DO:
+- Use CLI tools for automation
+- Use the free metrics (basic monitoring)
+- Use custom metrics for application-specific data
+- Use detailed monitoring for critical instances (1-minute granularity)
+- Set up composite alarms to reduce noise
+- Use CloudWatch Logs Insights for querying
+
+❌ DON'T:
+- Set thresholds too low (alert fatigue)
+- Ignore INSUFFICIENT_DATA state
+- Log everything without retention policy
+```
+
+---
+
+### 0.12 Naming Conventions
+
+```
+✅ DO:
+- Decide on a naming convention early, and stick to it
+- Include environment, service, and region in names
+- Example: prod-user-service-us-east-1, dev-db-primary
+
+Examples:
+- VPC: vpc-prod-us-east-1, vpc-dev-us-east-1
+- Subnet: subnet-prod-app-1a, subnet-prod-db-1b
+- Security Group: sg-prod-app-servers, sg-prod-db-access
+- EC2: i-prod-app-server-01, i-prod-bastion-01
+- S3: mycompany-prod-assets-us-east-1
+- RDS: prod-db-primary, prod-db-replica
+
+❌ DON'T:
+- Use random names without pattern
+- Mix naming conventions
+```
 
 ---
 

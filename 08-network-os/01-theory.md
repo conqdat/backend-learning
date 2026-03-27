@@ -1,7 +1,408 @@
 # Phase 08: Network & OS - Lý Thuyết
 
-> **Thời gian:** 2 tuần
+> **Thời gian:** 3 tuần
 > **Mục tiêu:** Hiểu networking và Linux fundamentals cho backend development
+>
+> **Tham khảo:** [roadmap.sh/linux](https://roadmap.sh/linux), [roadmap.sh/devops](https://roadmap.sh/devops)
+
+---
+
+## 📚 BÀI 0: LINUX FUNDAMENTALS
+
+### 0.1 Linux Distribution
+
+**Popular Distributions:**
+
+| Distribution | Use Case | Package Manager |
+|-------------|----------|-----------------|
+| Ubuntu/Debian | Development, web servers | apt, apt-get |
+| RHEL/CentOS | Enterprise servers | yum, dnf |
+| SUSE Linux | Enterprise, SAP | zypper |
+| Alpine | Containers, minimal | apk |
+| Arch Linux | Development, learning | pacman |
+
+---
+
+### 0.2 Directory Hierarchy
+
+```
+/
+├── bin/          # Essential binaries (ls, cp, mv)
+├── boot/         # Boot loader files
+├── dev/          # Device files
+├── etc/          # Configuration files
+├── home/         # User home directories
+├── lib/          # Shared libraries
+├── media/        # Removable media
+├── mnt/          # Mount point
+├── opt/          # Optional software
+├── proc/         # Process information (virtual)
+├── root/         # Root user home
+├── run/          # Runtime data
+├── sbin/         # System binaries (root only)
+├── srv/          # Service data
+├── sys/          # System information (virtual)
+├── tmp/          # Temporary files
+├── usr/          # User programs
+│   ├── bin/      # User binaries
+│   ├── lib/      # User libraries
+│   └── local/    # Locally installed software
+└── var/          # Variable data (logs, databases)
+    ├── log/      # Log files
+    └── www/      # Web server data
+```
+
+---
+
+### 0.3 Shell & Terminal
+
+**Common Shells:**
+- `bash` - Default on most Linux distributions
+- `zsh` - Modern shell with plugins (Oh My Zsh)
+- `sh` - Bourne shell (POSIX standard)
+- `fish` - Friendly interactive shell
+
+**Terminal Knowledge:**
+```bash
+# Shell variables
+echo $SHELL        # Current shell
+echo $HOME         # Home directory
+echo $PATH         # Search path for commands
+echo $USER         # Current user
+echo $PWD          # Current directory
+echo $HOSTNAME     # Hostname
+
+# Environment variables
+export MY_VAR="value"
+env                # List all environment variables
+unset MY_VAR       # Remove variable
+
+# Command history
+history            # Show command history
+!123               # Run command #123 from history
+!!                 # Run last command
+!$                 # Last argument of last command
+Ctrl+R             # Search history (interactive)
+
+# Command substitution
+CURRENT_DATE=$(date)
+FILES=$(ls -la | wc -l)
+
+# Pipes and redirection
+command1 | command2        # Pipe output
+command > file.txt         # Redirect stdout (overwrite)
+command >> file.txt        # Redirect stdout (append)
+command 2> error.log       # Redirect stderr
+command > output.txt 2>&1  # Redirect both stdout and stderr
+command < input.txt        # Redirect stdin
+```
+
+---
+
+### 0.4 Text Processing
+
+```bash
+# cut - Extract sections from lines
+cut -d: -f1 /etc/passwd          # First field (username)
+cut -d' ' -f1-3 file.txt         # Fields 1-3
+
+# paste - Merge lines of files
+paste file1.txt file2.txt
+paste -d',' file1.txt file2.txt  # With delimiter
+
+# sort - Sort lines
+sort file.txt                    # Alphabetical
+sort -n file.txt                 # Numeric
+sort -r file.txt                 # Reverse
+sort -u file.txt                 # Unique
+sort -t: -k3 -n /etc/passwd      # Sort by 3rd field
+
+# head/tail - First/last lines
+head -n 20 file.txt              # First 20 lines
+tail -n 20 file.txt              # Last 20 lines
+tail -f /var/log/app.log         # Follow (real-time)
+tail -F /var/log/app.log         # Follow with retry
+
+# join - Join lines on common field
+join -t: file1.txt file2.txt
+
+# split - Split file into pieces
+split -l 100 large.txt small_    # 100 lines per file
+split -b 10M large.tar.gz part_  # 10MB per file
+
+# tee - Read from stdin, write to stdout and file
+command | tee output.txt         # Save and display
+command | tee -a output.txt      # Append
+
+# nl - Number lines
+nl file.txt
+
+# wc - Word count
+wc file.txt                      # Lines, words, bytes
+wc -l file.txt                   # Lines only
+wc -w file.txt                   # Words only
+wc -c file.txt                   # Bytes only
+
+# uniq - Filter adjacent duplicate lines
+sort file.txt | uniq             # Remove duplicates
+sort file.txt | uniq -c          # Count occurrences
+sort file.txt | uniq -d          # Show duplicates only
+
+# grep - Search text
+grep "error" file.txt                    # Basic search
+grep -i "error" file.txt                 # Case insensitive
+grep -r "TODO" src/                      # Recursive
+grep -E "pattern1|pattern2" file.txt     # Extended regex
+grep -v "exclude" file.txt               # Inverse match
+grep -c "error" file.txt                 # Count matches
+grep -n "error" file.txt                 # Show line numbers
+grep -l "error" *.log                    # Files with matches
+grep -A 3 "error" file.txt               # 3 lines after match
+grep -B 3 "error" file.txt               # 3 lines before match
+grep -C 3 "error" file.txt               # 3 lines context
+
+# awk - Pattern scanning and processing
+awk '{print $1}' file.txt                # Print first field
+awk -F: '{print $1}' /etc/passwd         # Custom delimiter
+awk '$3 > 1000 {print $1}' file.txt      # Condition
+awk '{sum+=$1} END {print sum}' nums.txt # Sum
+awk '{print NR": "$0}' file.txt          # Line numbers
+
+# sed - Stream editor
+sed 's/old/new/g' file.txt               # Replace all
+sed 's/old/new/1' file.txt               # Replace first
+sed -i 's/old/new/g' file.txt            # In-place edit
+sed '/pattern/d' file.txt                # Delete lines
+sed -n '5,10p' file.txt                  # Print lines 5-10
+sed -n 's/pattern/replacement/p' file.txt # Print only matches
+```
+
+---
+
+### 0.5 Process Management Deep Dive
+
+```bash
+# Process states
+# R - Running/Runnable
+# S - Sleeping (interruptible)
+# D - Sleeping (uninterruptible, usually I/O)
+# T - Stopped
+# Z - Zombie (terminated but not reaped)
+
+# Background/Foreground jobs
+./long-running.sh &          # Run in background
+jobs                         # List background jobs
+fg %1                        # Bring job 1 to foreground
+bg %1                        # Send job 1 to background
+Ctrl+Z                       # Suspend current job
+Ctrl+C                       # Kill current job
+
+# Process signals
+kill -l                      # List all signals
+kill -TERM 1234              # Graceful terminate (SIGTERM, 15)
+kill -KILL 1234              # Force kill (SIGKILL, 9)
+kill -HUP 1234               # Reload config (SIGHUP, 1)
+kill -INT 1234               # Interrupt (SIGINT, 2)
+kill -USR1 1234              # User-defined signal 1
+
+# Process priorities (nice values)
+nice -n 10 ./slow.sh         # Run with lower priority
+renice +5 -p 1234            # Change priority of running process
+# Nice range: -20 (highest) to 19 (lowest)
+
+# Process forking
+# Parent creates child process with fork()
+# Child gets copy of parent's memory space
+# ps -ef --forest           # Show process tree
+pstree -p                    # Show process tree with PIDs
+```
+
+---
+
+### 0.6 User & Group Management
+
+```bash
+# User management
+useradd -m john              # Create user with home directory
+userdel -r john              # Delete user and home directory
+usermod -aG sudo john        # Add user to sudo group
+passwd john                  # Change user password
+id john                      # Show user info
+whoami                       # Current user
+users                        # Logged in users
+w                            # Who is logged in + what doing
+
+# Group management
+groupadd developers
+groupdel developers
+groups john                  # Show user's groups
+
+# Permission management
+chmod 755 script.sh          # rwxr-xr-x
+chmod u+x script.sh          # Add execute for owner
+chmod g-w file.txt           # Remove write for group
+chmod o=r file.txt           # Others can only read
+chmod a+x script.sh          # All can execute
+
+# Special permissions
+chmod u+s binary             # SetUID - run as owner
+chmod g+s directory          # SetGID - inherit group
+chmod +t /tmp                # Sticky bit - only owner can delete
+
+# sudo
+sudo command                 # Run as root
+sudo -u postgres command     # Run as specific user
+visudo                       # Edit sudoers file safely
+```
+
+---
+
+### 0.7 Package Management
+
+```bash
+# APT (Debian/Ubuntu)
+sudo apt update              # Update package list
+sudo apt upgrade             # Upgrade packages
+sudo apt install nginx       # Install package
+sudo apt remove nginx        # Remove package
+sudo apt purge nginx         # Remove + config files
+sudo apt search keyword      # Search packages
+apt list --installed         # List installed packages
+apt show package             # Show package info
+
+# YUM/DNF (RHEL/CentOS)
+sudo yum update
+sudo yum install nginx
+sudo yum remove nginx
+sudo yum search keyword
+sudo yum list installed
+
+# APK (Alpine)
+apk update
+apk add nginx
+apk del nginx
+apk search keyword
+
+# Snap (Universal)
+snap install package
+snap remove package
+snap list
+snap refresh               # Update
+```
+
+---
+
+### 0.8 Systemd (Service Management)
+
+```bash
+# Service management
+systemctl start nginx              # Start service
+systemctl stop nginx               # Stop service
+systemctl restart nginx            # Restart service
+systemctl reload nginx             # Reload config
+systemctl status nginx             # Check status
+systemctl enable nginx             # Enable at boot
+systemctl disable nginx            # Disable at boot
+systemctl is-active nginx          # Check if running
+systemctl is-enabled nginx         # Check if enabled
+
+# View logs
+journalctl -u nginx                # Service logs
+journalctl -u nginx -f             # Follow logs
+journalctl -u nginx --since today  # Today's logs
+journalctl -u nginx -n 50          # Last 50 lines
+
+# Create custom service
+# /etc/systemd/system/myapp.service
+[Unit]
+Description=My Spring Boot App
+After=network.target
+
+[Service]
+Type=simple
+User=appuser
+WorkingDirectory=/opt/myapp
+ExecStart=/usr/bin/java -jar /opt/myapp/app.jar
+Restart=on-failure
+Environment=SPRING_PROFILES_ACTIVE=prod
+
+[Install]
+WantedBy=multi-user.target
+
+# Reload systemd and enable
+systemctl daemon-reload
+systemctl enable myapp
+systemctl start myapp
+```
+
+---
+
+### 0.9 Disk & Filesystem
+
+```bash
+# Disk information
+df -h                      # Disk free (human readable)
+df -i                      # Inode usage
+du -sh directory/          # Directory size
+du -ah | sort -rh | head -20   # Top 20 largest files
+
+# Mount management
+mount                      # Show mounted filesystems
+umount /mnt/disk           # Unmount
+mount -t nfs server:/path /mnt   # Mount NFS
+lsblk                      # List block devices
+blkid                      # Show block device UUIDs
+
+# Filesystem info
+cat /etc/fstab             # Mount points config
+cat /proc/mounts           # Currently mounted
+
+# Swap
+free -h                    # Memory + swap
+swapon --show              # Show swap
+sudo swapon /dev/sda2      # Enable swap
+sudo swapoff /dev/sda2     # Disable swap
+```
+
+---
+
+### 0.10 Network Configuration
+
+```bash
+# Interface configuration
+ip addr show               # Show IP addresses
+ip link show               # Show network interfaces
+ip route show              # Show routing table
+ip neigh show              # Show ARP table
+
+# Legacy commands
+ifconfig                   # Interface config (deprecated)
+route -n                   # Routing table (deprecated)
+arp -a                     # ARP table (deprecated)
+
+# DNS configuration
+cat /etc/resolv.conf       # DNS servers
+cat /etc/hosts             # Local hostname mappings
+hostnamectl                # Hostname control
+hostname myserver          # Set hostname
+
+# Network troubleshooting
+ping -c 4 google.com       # Test connectivity
+traceroute google.com      # Trace route
+mtr google.com             # Combined ping + traceroute
+ss -tulpn                  # Listening ports
+netstat -tulpn             # Legacy alternative
+tcpdump -i eth0 port 80    # Packet capture
+tcpdump -i eth0 -w capture.pcap  # Save to file
+
+# SSH
+ssh user@host              # SSH connect
+ssh -i key.pem user@host   # With key
+ssh -p 2222 user@host      # Custom port
+scp file.txt user@host:/path   # Copy file
+scp -r dir/ user@host:/path     # Copy directory
+rsync -avz src/ dst/       # Sync files
+```
 
 ---
 

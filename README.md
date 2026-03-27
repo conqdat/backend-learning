@@ -86,6 +86,11 @@ backend-learning/
 │
 └── 10-capstone/                       ← Final Project (6 tuần)
     └── project-requirements.md        (E-commerce platform)
+
+└── 11-elasticsearch/                  ← Search & Analytics (2 tuần)
+    ├── 01-theory.md                   (ES architecture, queries, aggregations)
+    ├── 02-examples.md                 (Spring Data Elasticsearch)
+    └── 03-exercises.md                (Search implementation)
 ```
 
 ---
@@ -109,8 +114,9 @@ backend-learning/
 | **08**   | Network & OS        | 2 tuần    | ⭐⭐⭐     | HTTP, TCP/IP, Linux commands              |
 | **09**   | System Design       | 4 tuần    | ⭐⭐⭐⭐⭐ | Design scalable systems                   |
 | **10**   | Capstone            | 6 tuần    | ⭐⭐⭐⭐⭐ | Production-ready project                  |
+| **11**   | Elasticsearch       | 2 tuần    | ⭐⭐⭐⭐   | Search, aggregations, analytics           |
 
-**Tổng:** 43 tuần (~10-11 tháng)
+**Tổng:** 45 tuần (~11-12 tháng)
 
 ---
 
@@ -361,6 +367,22 @@ backend-learning/
 - Container (Docker, Kubernetes)
 - CI/CD (GitHub Actions)
 - Monitoring (Prometheus, Grafana, ELK)
+
+---
+
+### Phase 11: Elasticsearch (2 tuần) ⭐⭐⭐⭐
+
+**Nội dung:**
+
+- Week 1: Elasticsearch architecture, data modelling, CRUD operations
+- Week 2: Search queries, aggregations, text analysis, Spring Data integration
+
+**Bài tập lớn:**
+
+- Build product search for e-commerce
+- Implement faceted search with filters
+- Log analytics with Kibana dashboards
+- Autocomplete/suggestions feature
 
 ---
 

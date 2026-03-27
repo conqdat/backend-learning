@@ -1,10 +1,903 @@
-# Phase 2: Database & Hibernate - Ví Dụ Thực Tế
+# Database - Examples & Code Samples
 
 ---
 
-## 📁 BÀI 1: ENTITY LIFECYCLE DEMO
+## PHẦN 1: SQL EXAMPLES
 
-### Ví dụ 1.1: Demo 4 trạng thái của Entity
+### 1.1 E-commerce Database Schema
+
+```sql
+-- Users table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
+    status VARCHAR(20) DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Categories with hierarchy
+CREATE TABLE categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    parent_id INTEGER REFERENCES categories(id),
+    slug VARCHAR(100) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Products
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(10, 2) NOT NULL,
+    category_id INTEGER REFERENCES categories(id),
+    stock_quantity INTEGER DEFAULT 0,
+    status VARCHAR(20) DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Orders
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    status VARCHAR(20) DEFAULT 'pending',
+    total_amount DECIMAL(10, 2) NOT NULL,
+    shipping_address TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Order Items
+CREATE TABLE order_items (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(id),
+    quantity INTEGER NOT NULL,
+    unit_price DECIMAL(10, 2) NOT NULL,
+    subtotal DECIMAL(10, 2) NOT NULL
+);
+
+-- Reviews
+CREATE TABLE reviews (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id),
+    rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Cart
+CREATE TABLE carts (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE cart_items (
+    id SERIAL PRIMARY KEY,
+    cart_id INTEGER REFERENCES carts(id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(id),
+    quantity INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes
+CREATE INDEX idx_products_category ON products(category_id);
+CREATE INDEX idx_products_status ON products(status);
+CREATE INDEX idx_orders_user ON orders(user_id);
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_order_items_order ON order_items(order_id);
+CREATE INDEX idx_reviews_product ON reviews(product_id);
+```
+
+---
+
+### 1.2 Common SQL Queries
+
+#### Get products with category info
+
+```sql
+SELECT
+    p.id,
+    p.name,
+    p.price,
+    c.name AS category_name,
+    c.slug AS category_slug
+FROM products p
+LEFT JOIN categories c ON p.category_id = c.id
+WHERE p.status = 'active'
+ORDER BY p.created_at DESC
+LIMIT 20;
+```
+
+#### Get order details with items
+
+```sql
+SELECT
+    o.id AS order_id,
+    o.status,
+    o.total_amount,
+    o.created_at,
+    u.full_name AS customer_name,
+    u.email,
+    oi.quantity,
+    oi.unit_price,
+    oi.subtotal,
+    pr.name AS product_name
+FROM orders o
+JOIN users u ON o.user_id = u.id
+JOIN order_items oi ON oi.order_id = o.id
+JOIN products pr ON oi.product_id = pr.id
+WHERE o.id = 1;
+```
+
+#### Get product with average rating
+
+```sql
+SELECT
+    p.*,
+    c.name AS category_name,
+    COALESCE(AVG(r.rating), 0) AS avg_rating,
+    COUNT(r.id) AS review_count
+FROM products p
+LEFT JOIN categories c ON p.category_id = c.id
+LEFT JOIN reviews r ON r.product_id = p.id
+WHERE p.id = 1
+GROUP BY p.id, c.id;
+```
+
+#### Get user's order history with totals
+
+```sql
+SELECT
+    o.id,
+    o.status,
+    o.total_amount,
+    o.created_at,
+    COUNT(oi.id) AS item_count
+FROM orders o
+LEFT JOIN order_items oi ON oi.order_id = o.id
+WHERE o.user_id = 1
+GROUP BY o.id, o.status, o.total_amount, o.created_at
+ORDER BY o.created_at DESC;
+```
+
+#### Get category hierarchy (recursive CTE)
+
+```sql
+WITH RECURSIVE category_tree AS (
+    -- Base case: top-level categories
+    SELECT id, name, parent_id, 0 AS level
+    FROM categories
+    WHERE parent_id IS NULL
+
+    UNION ALL
+
+    -- Recursive case: child categories
+    SELECT c.id, c.name, c.parent_id, ct.level + 1
+    FROM categories c
+    INNER JOIN category_tree ct ON c.parent_id = ct.id
+)
+SELECT * FROM category_tree
+ORDER BY level, name;
+```
+
+#### Get top-selling products
+
+```sql
+SELECT
+    p.id,
+    p.name,
+    p.price,
+    SUM(oi.quantity) AS total_sold,
+    SUM(oi.subtotal) AS total_revenue
+FROM products p
+JOIN order_items oi ON oi.product_id = p.id
+JOIN orders o ON o.id = oi.order_id
+WHERE o.status != 'cancelled'
+GROUP BY p.id, p.name, p.price
+ORDER BY total_sold DESC
+LIMIT 10;
+```
+
+#### Monthly sales report
+
+```sql
+SELECT
+    DATE_TRUNC('month', o.created_at) AS month,
+    COUNT(DISTINCT o.id) AS order_count,
+    COUNT(DISTINCT o.user_id) AS customer_count,
+    SUM(o.total_amount) AS total_revenue,
+    AVG(o.total_amount) AS avg_order_value
+FROM orders o
+WHERE o.status != 'cancelled'
+GROUP BY DATE_TRUNC('month', o.created_at)
+ORDER BY month DESC;
+```
+
+#### Get products by price range with window function
+
+```sql
+SELECT
+    id,
+    name,
+    price,
+    NTILE(4) OVER (ORDER BY price) AS price_quartile,
+    PERCENT_RANK() OVER (ORDER BY price) AS price_percentile
+FROM products
+WHERE status = 'active';
+```
+
+#### Running total of daily sales
+
+```sql
+SELECT
+    DATE_TRUNC('day', created_at) AS sale_date,
+    COUNT(*) AS order_count,
+    SUM(total_amount) AS daily_revenue,
+    SUM(SUM(total_amount)) OVER (ORDER BY DATE_TRUNC('day', created_at)) AS running_total
+FROM orders
+WHERE status != 'cancelled'
+GROUP BY DATE_TRUNC('day', created_at)
+ORDER BY sale_date;
+```
+
+---
+
+### 1.3 Query Optimization Examples
+
+#### Before (N+1 problem)
+
+```sql
+-- Query 1: Get all users
+SELECT * FROM users;
+
+-- Then for each user, query their orders:
+SELECT * FROM orders WHERE user_id = 1;
+SELECT * FROM orders WHERE user_id = 2;
+SELECT * FROM orders WHERE user_id = 3;
+-- ... (100 queries for 100 users)
+```
+
+#### After (JOIN FETCH)
+
+```sql
+SELECT
+    u.id AS user_id,
+    u.email,
+    u.full_name,
+    o.id AS order_id,
+    o.status,
+    o.total_amount
+FROM users u
+LEFT JOIN orders o ON o.user_id = u.id
+WHERE u.status = 'active';
+```
+
+#### Using Indexes Effectively
+
+```sql
+-- Create composite index
+CREATE INDEX idx_orders_user_status ON orders(user_id, status);
+
+-- Query uses index efficiently
+SELECT * FROM orders
+WHERE user_id = 1 AND status = 'completed';
+
+-- Query also uses index (leftmost prefix)
+SELECT * FROM orders
+WHERE user_id = 1;
+
+-- Query does NOT use index (skipped first column)
+SELECT * FROM orders
+WHERE status = 'completed';
+```
+
+---
+
+## PHẦN 2: MONGODB EXAMPLES
+
+### 2.1 Document Schemas
+
+#### User Collection
+
+```javascript
+{
+    _id: ObjectId("507f1f77bcf86cd799439011"),
+    email: "john@example.com",
+    passwordHash: "$2b$10$...",
+    fullName: "John Doe",
+    phone: "+1234567890",
+    status: "active",  // active, inactive, banned
+    roles: ["user", "admin"],
+    profile: {
+        avatar: "https://...",
+        bio: "Software developer",
+        location: {
+            city: "New York",
+            country: "USA",
+            coordinates: [-74.0060, 40.7128]
+        }
+    },
+    settings: {
+        notifications: true,
+        theme: "dark",
+        language: "en"
+    },
+    createdAt: ISODate("2024-01-15T10:30:00Z"),
+    updatedAt: ISODate("2024-01-15T10:30:00Z")
+}
+```
+
+#### Product Collection (with embedded reviews)
+
+```javascript
+{
+    _id: ObjectId("507f1f77bcf86cd799439012"),
+    name: "iPhone 15 Pro",
+    description: "Latest Apple flagship...",
+    price: NumberDecimal("999.00"),
+    category: "electronics",
+    subcategory: "smartphones",
+    tags: ["apple", "smartphone", "5g"],
+    stock: 100,
+    status: "active",
+    images: [
+        "https://.../image1.jpg",
+        "https://.../image2.jpg"
+    ],
+    specifications: {
+        display: "6.1 inch OLED",
+        processor: "A17 Pro",
+        ram: "8GB",
+        storage: "256GB"
+    },
+    reviews: [
+        {
+            userId: ObjectId("507f1f77bcf86cd799439011"),
+            userName: "John Doe",
+            rating: 5,
+            comment: "Excellent phone!",
+            createdAt: ISODate("2024-01-20T10:30:00Z")
+        }
+    ],
+    reviewStats: {
+        averageRating: 4.5,
+        totalReviews: 150,
+        ratingDistribution: { 5: 100, 4: 30, 3: 15, 2: 3, 1: 2 }
+    },
+    createdAt: ISODate("2024-01-15T10:30:00Z"),
+    updatedAt: ISODate("2024-01-20T10:30:00Z")
+}
+```
+
+#### Order Collection (with embedded items)
+
+```javascript
+{
+    _id: ObjectId("507f1f77bcf86cd799439013"),
+    userId: ObjectId("507f1f77bcf86cd799439011"),
+    status: "completed",  // pending, processing, completed, cancelled
+    items: [
+        {
+            productId: ObjectId("507f1f77bcf86cd799439012"),
+            name: "iPhone 15 Pro",
+            quantity: 1,
+            unitPrice: NumberDecimal("999.00"),
+            subtotal: NumberDecimal("999.00")
+        }
+    ],
+    pricing: {
+        subtotal: NumberDecimal("999.00"),
+        discount: NumberDecimal("0.00"),
+        shipping: NumberDecimal("10.00"),
+        tax: NumberDecimal("89.91"),
+        total: NumberDecimal("1098.91")
+    },
+    shippingAddress: {
+        fullName: "John Doe",
+        street: "123 Main St",
+        city: "New York",
+        state: "NY",
+        zipCode: "10001",
+        country: "USA",
+        phone: "+1234567890"
+    },
+    payment: {
+        method: "credit_card",
+        status: "paid",
+        transactionId: "txn_123456"
+    },
+    timeline: [
+        { status: "pending", timestamp: ISODate("2024-01-20T10:30:00Z") },
+        { status: "processing", timestamp: ISODate("2024-01-20T11:00:00Z") },
+        { status: "shipped", timestamp: ISODate("2024-01-20T15:00:00Z") },
+        { status: "completed", timestamp: ISODate("2024-01-22T10:00:00Z") }
+    ],
+    createdAt: ISODate("2024-01-20T10:30:00Z"),
+    updatedAt: ISODate("2024-01-22T10:00:00Z")
+}
+```
+
+---
+
+### 2.2 CRUD Operations
+
+#### Insert Operations
+
+```javascript
+// Insert single document
+db.users.insertOne({
+    email: "john@example.com",
+    fullName: "John Doe",
+    status: "active",
+    createdAt: new Date()
+});
+
+// Insert multiple documents
+db.products.insertMany([
+    {
+        name: "iPhone 15 Pro",
+        price: NumberDecimal("999.00"),
+        category: "electronics",
+        stock: 100,
+        createdAt: new Date()
+    },
+    {
+        name: "Samsung Galaxy S24",
+        price: NumberDecimal("899.00"),
+        category: "electronics",
+        stock: 150,
+        createdAt: new Date()
+    }
+]);
+
+// Insert with generated fields
+db.orders.insertOne({
+    userId: ObjectId("507f1f77bcf86cd799439011"),
+    status: "pending",
+    items: [],
+    pricing: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0 },
+    createdAt: new Date(),
+    updatedAt: new Date()
+});
+```
+
+#### Query Operations
+
+```javascript
+// Basic find
+db.users.find({ status: "active" });
+
+// Find with projection
+db.users.find(
+    { status: "active" },
+    { email: 1, fullName: 1, _id: 0 }
+);
+
+// Find with nested field
+db.users.find({ "profile.location.city": "New York" });
+
+// Find with array contains
+db.users.find({ roles: "admin" });
+
+// Find with comparison operators
+db.products.find({ price: { $gte: 500, $lte: 1000 } });
+
+// Find with logical operators
+db.products.find({
+    $or: [
+        { stock: { $lt: 10 } },
+        { status: "discontinued" }
+    ]
+});
+
+// Find with array operators
+db.products.find({ tags: { $all: ["apple", "5g"] } });
+
+// Find with regex
+db.users.find({ email: { $regex: /@gmail\.com$/ } });
+
+// Find with element operator
+db.users.find({ phone: { $exists: true } });
+
+// Find sorted and paginated
+db.products.find({ status: "active" })
+    .sort({ price: -1 })
+    .skip(0)
+    .limit(20);
+```
+
+#### Update Operations
+
+```javascript
+// Update single field
+db.users.updateOne(
+    { email: "john@example.com" },
+    { $set: { status: "inactive" } }
+);
+
+// Update multiple fields
+db.users.updateOne(
+    { email: "john@example.com" },
+    {
+        $set: {
+            fullName: "John Smith",
+            phone: "+1987654321"
+        },
+        $currentDate: { updatedAt: true }
+    }
+);
+
+// Increment numeric field
+db.products.updateOne(
+    { _id: ObjectId("507f1f77bcf86cd799439012") },
+    { $inc: { stock: -1 } }  // Decrease stock by 1
+);
+
+// Push to array
+db.users.updateOne(
+    { _id: ObjectId("507f1f77bcf86cd799439011") },
+    { $push: { roles: "premium" } }
+);
+
+// Add to set (no duplicates)
+db.users.updateOne(
+    { _id: ObjectId("507f1f77bcf86cd799439011") },
+    { $addToSet: { roles: "vip" } }
+);
+
+// Pull from array
+db.users.updateOne(
+    { _id: ObjectId("507f1f77bcf86cd799439011") },
+    { $pull: { roles: "premium" } }
+);
+
+// Update nested field
+db.users.updateOne(
+    { _id: ObjectId("507f1f77bcf86cd799439011") },
+    { $set: { "profile.bio": "Senior Developer" } }
+);
+
+// Update array element
+db.products.updateOne(
+    { "reviews.userId": ObjectId("507f1f77bcf86cd799439011") },
+    { $set: { "reviews.$.comment": "Updated review" } }
+);
+
+// Upsert (update or insert)
+db.users.updateOne(
+    { email: "newuser@example.com" },
+    {
+        $set: { status: "active" },
+        $setOnInsert: { createdAt: new Date() }
+    },
+    { upsert: true }
+);
+
+// Update many
+db.products.updateMany(
+    { category: "electronics" },
+    { $set: { status: "active" } }
+);
+```
+
+#### Delete Operations
+
+```javascript
+// Delete one
+db.users.deleteOne({ email: "john@example.com" });
+
+// Delete many
+db.products.deleteMany({ status: "discontinued" });
+
+// Soft delete (recommended)
+db.users.updateOne(
+    { _id: ObjectId("507f1f77bcf86cd799439011") },
+    {
+        $set: {
+            status: "deleted",
+            deletedAt: new Date()
+        }
+    }
+);
+```
+
+---
+
+### 2.3 Aggregation Pipeline Examples
+
+#### Get product sales summary
+
+```javascript
+db.orders.aggregate([
+    // Match completed orders
+    { $match: { status: "completed" } },
+
+    // Unwind items array
+    { $unwind: "$items" },
+
+    // Group by product
+    {
+        $group: {
+            _id: "$items.productId",
+            productName: { $first: "$items.name" },
+            totalQuantity: { $sum: "$items.quantity" },
+            totalRevenue: { $sum: "$items.subtotal" },
+            orderCount: { $sum: 1 }
+        }
+    },
+
+    // Sort by revenue
+    { $sort: { totalRevenue: -1 } },
+
+    // Limit to top 10
+    { $limit: 10 }
+]);
+```
+
+#### Get user order statistics
+
+```javascript
+db.orders.aggregate([
+    { $match: { status: "completed" } },
+
+    {
+        $group: {
+            _id: "$userId",
+            totalOrders: { $sum: 1 },
+            totalSpent: { $sum: "$pricing.total" },
+            avgOrderValue: { $avg: "$pricing.total" },
+            lastOrderDate: { $max: "$createdAt" }
+        }
+    },
+
+    {
+        $lookup: {
+            from: "users",
+            localField: "_id",
+            foreignField: "_id",
+            as: "user"
+        }
+    },
+
+    { $unwind: "$user" },
+
+    {
+        $project: {
+            _id: 0,
+            userId: "$_id",
+            email: "$user.email",
+            fullName: "$user.fullName",
+            totalOrders: 1,
+            totalSpent: { $round: ["$totalSpent", 2] },
+            avgOrderValue: { $round: ["$avgOrderValue", 2] },
+            lastOrderDate: 1
+        }
+    },
+
+    { $sort: { totalSpent: -1 } }
+]);
+```
+
+#### Monthly revenue report
+
+```javascript
+db.orders.aggregate([
+    { $match: { status: { $ne: "cancelled" } } },
+
+    {
+        $group: {
+            _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" }
+            },
+            orderCount: { $sum: 1 },
+            totalRevenue: { $sum: "$pricing.total" },
+            customerCount: { $addToSet: "$userId" }
+        }
+    },
+
+    {
+        $project: {
+            _id: 0,
+            year: "$_id.year",
+            month: "$_id.month",
+            orderCount: 1,
+            totalRevenue: { $round: ["$totalRevenue", 2] },
+            uniqueCustomers: { $size: "$customerCount" }
+        }
+    },
+
+    { $sort: { year: -1, month: -1 } }
+]);
+```
+
+#### Product with review analytics
+
+```javascript
+db.products.aggregate([
+    { $match: { status: "active" } },
+
+    { $unwind: { path: "$reviews", preserveNullAndEmptyArrays: true } },
+
+    {
+        $group: {
+            _id: "$_id",
+            name: { $first: "$name" },
+            price: { $first: "$price" },
+            avgRating: { $avg: "$reviews.rating" },
+            reviewCount: { $sum: { $cond: [{ $ne: ["$reviews", null] }, 1, 0] } },
+            ratingDistribution: {
+                $push: "$reviews.rating"
+            }
+        }
+    },
+
+    {
+        $project: {
+            name: 1,
+            price: 1,
+            avgRating: { $round: [{ $coalesce: ["$avgRating", 0] }, 2] },
+            reviewCount: 1,
+            ratingDistribution: {
+                $cond: [
+                    { $gt: ["$reviewCount", 0] },
+                    {
+                        "5": { $size: { $filter: { input: "$ratingDistribution", cond: { $eq: ["$$this", 5] } } } },
+                        "4": { $size: { $filter: { input: "$ratingDistribution", cond: { $eq: ["$$this", 4] } } } },
+                        "3": { $size: { $filter: { input: "$ratingDistribution", cond: { $eq: ["$$this", 3] } } } },
+                        "2": { $size: { $filter: { input: "$ratingDistribution", cond: { $eq: ["$$this", 2] } } } },
+                        "1": { $size: { $filter: { input: "$ratingDistribution", cond: { $eq: ["$$this", 1] } } } }
+                    },
+                    { "5": 0, "4": 0, "3": 0, "2": 0, "1": 0 }
+                ]
+            }
+        }
+    }
+]);
+```
+
+#### Customer segmentation (RFM Analysis)
+
+```javascript
+const referenceDate = new Date();
+
+db.orders.aggregate([
+    { $match: { status: "completed" } },
+
+    {
+        $group: {
+            _id: "$userId",
+            totalOrders: { $sum: 1 },
+            totalSpent: { $sum: "$pricing.total" },
+            lastOrderDate: { $max: "$createdAt" },
+            firstOrderDate: { $min: "$createdAt" }
+        }
+    },
+
+    {
+        $project: {
+            _id: 0,
+            userId: "$_id",
+            totalOrders: 1,
+            totalSpent: 1,
+            recency: {
+                $dateDiff: {
+                    start: "$lastOrderDate",
+                    end: referenceDate,
+                    unit: "day"
+                }
+            },
+            frequency: "$totalOrders",
+            monetary: "$totalSpent",
+            customerSince: "$firstOrderDate"
+        }
+    },
+
+    {
+        $addFields: {
+            segment: {
+                $switch: {
+                    branches: [
+                        {
+                            case: {
+                                $and: [
+                                    { $lte: ["$recency", 30] },
+                                    { $gte: ["$frequency", 5] },
+                                    { $gte: ["$monetary", 500] }
+                                ]
+                            },
+                            then: "VIP"
+                        },
+                        {
+                            case: { $lte: ["$recency", 60] },
+                            then: "Active"
+                        },
+                        {
+                            case: { $lte: ["$recency", 180] },
+                            then: "At Risk"
+                        },
+                        {
+                            case: { $gt: ["$recency", 180] },
+                            then: "Churned"
+                        }
+                    ],
+                    default: "New"
+                }
+            }
+        }
+    }
+]);
+```
+
+---
+
+### 2.4 Index Examples
+
+```javascript
+// Create indexes
+db.users.createIndex({ email: 1 }, { unique: true });
+db.users.createIndex({ status: 1, createdAt: -1 });
+db.users.createIndex({ "profile.location.city": 1 });
+db.users.createIndex({ roles: 1 });
+
+db.products.createIndex({ category: 1, status: 1 });
+db.products.createIndex({ price: 1 });
+db.products.createIndex({ tags: 1 });
+db.products.createIndex({ name: "text", description: "text" });
+
+db.orders.createIndex({ userId: 1, createdAt: -1 });
+db.orders.createIndex({ status: 1 });
+db.orders.createIndex({ createdAt: -1 });
+
+// Text search
+db.products.createIndex({ name: "text", description: "text" });
+
+// Search products
+db.products.find({
+    $text: { $search: "iphone case" }
+});
+
+// Text search with score
+db.products.find(
+    { $text: { $search: "iphone" } },
+    { score: { $meta: "textScore" } }
+).sort({ score: { $meta: "textScore" } });
+
+// Geospatial index
+db.places.createIndex({ location: "2dsphere" });
+
+// Find nearby places
+db.places.find({
+    location: {
+        $near: {
+            $geometry: {
+                type: "Point",
+                coordinates: [-74.0060, 40.7128]
+            },
+            $maxDistance: 5000  // 5km
+        }
+    }
+});
+
+// TTL index for sessions
+db.sessions.createIndex(
+    { expiresAt: 1 },
+    { expireAfterSeconds: 0 }
+);
+```
+
+---
+
+## PHẦN 3: SPRING DATA INTEGRATION
+
+### 3.1 Spring Data JPA Repository
 
 ```java
 @Entity
@@ -14,819 +907,265 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Version  // Optimistic locking
-    private Integer version;
+    @Column(name = "full_name", nullable = false)
+    private String fullName;
 
-    // Constructors, Getters, Setters
-}
-```
-
-```java
-@Service
-@Transactional
-public class UserLifecycleDemo {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private EntityManager entityManager;
-
-    public void demonstrateLifecycle() {
-        System.out.println("=== ENTITY LIFECYCLE DEMO ===\n");
-
-        // 1. NEW (TRANSIENT) STATE
-        System.out.println("1. NEW STATE");
-        User newUser = new User();
-        newUser.setName("John Doe");
-        newUser.setEmail("john@example.com");
-        // newUser chưa được persist, ở trạng thái NEW
-        System.out.println("   - Created new User: " + newUser.getName());
-        System.out.println("   - ID: " + newUser.getId());  // null
-        System.out.println("   - State: NEW/TRANSIENT\n");
-
-        // 2. MANAGED STATE
-        System.out.println("2. MANAGED STATE");
-        userRepository.save(newUser);
-        // newUser bây giờ được EntityManager quản lý
-        System.out.println("   - After save(): ID = " + newUser.getId());
-        System.out.println("   - State: MANAGED\n");
-
-        // 3. AUTO-DIRTY CHECKING
-        System.out.println("3. AUTO-DIRTY CHECKING");
-        newUser.setName("Jane Doe");
-        // Không cần gọi update()!
-        System.out.println("   - Changed name to: " + newUser.getName());
-        System.out.println("   - No update() call needed!\n");
-
-        // 4. DETACHED STATE
-        System.out.println("4. DETACHED STATE");
-        // Transaction kết thúc ở cuối method
-        // newUser trở thành DETACHED
-        System.out.println("   - After transaction ends: State = DETACHED\n");
-
-        // 5. MERGE DETACHED ENTITY
-        System.out.println("5. MERGE STATE");
-        User detachedUser = userRepository.findById(newUser.getId()).get();
-        entityManager.detach(detachedUser);
-        System.out.println("   - After detach(): State = DETACHED");
-
-        detachedUser.setName("Bob Smith");
-
-        User mergedUser = entityManager.merge(detachedUser);
-        System.out.println("   - After merge(): State = MANAGED");
-        System.out.println("   - Updated name: " + mergedUser.getName());
-    }
-
-    public void demonstrateRemove() {
-        // 6. REMOVED STATE
-        User user = userRepository.findById(1L).get();
-        System.out.println("Before remove: State = MANAGED");
-
-        userRepository.delete(user);
-        System.out.println("After delete(): State = REMOVED");
-        // user vẫn có thể access nhưng không thể persist lại
-    }
-}
-```
-
----
-
-## 📁 BÀI 2: RELATIONSHIPS - BEST PRACTICES
-
-### Ví dụ 2.1: @OneToMany / @ManyToOne đúng cách
-
-**Sai lầm phổ biến:**
-```java
-// ❌ SAI: Không có helper methods, orphanRemoval = false
-@Entity
-public class User {
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Post> posts;
-}
-
-// Khi muốn xóa post:
-user.getPosts().remove(post);
-// ❌ Post vẫn tồn tại trong DB! orphanRemoval = false
-```
-
-**Đúng:**
-```java
-// ✅ ĐÚNG
-@Entity
-public class User {
-    @OneToMany(
-        mappedBy = "user",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
-    )
-    private List<Post> posts = new ArrayList<>();
-
-    // Helper methods - QUAN TRỌNG!
-    public void addPost(Post post) {
-        posts.add(post);
-        post.setUser(this);
-    }
-
-    public void removePost(Post post) {
-        posts.remove(post);
-        post.setUser(null);
-        // orphanRemoval = true sẽ tự DELETE post khỏi DB
-    }
-}
-
-@Entity
-public class Post {
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-}
-```
-
-**Sử dụng:**
-```java
-@Service
-public class PostService {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Transactional
-    public void addPostToUser(Long userId, Post post) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        user.addPost(post);  // Dùng helper method
-        // Không cần gọi userRepository.save(user)!
-        // Hibernate tự detect changes và persist
-    }
-
-    @Transactional
-    public void removePost(Post post) {
-        User user = post.getUser();
-        if (user != null) {
-            user.removePost(post);  // orphanRemoval sẽ DELETE
-        }
-    }
-}
-```
-
----
-
-### Ví dụ 2.2: @OneToOne với cascade
-
-```java
-@Entity
-public class User {
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    private String name;
-
-    @OneToOne(
-        mappedBy = "user",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true,
-        fetch = FetchType.LAZY
-    )
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    private UserProfile profile;
-
-    public void setProfile(UserProfile profile) {
-        if (this.profile != null) {
-            this.profile.setUser(null);
-        }
-        this.profile = profile;
-        if (profile != null) {
-            profile.setUser(this);
-        }
-    }
-}
-
-@Entity
-public class UserProfile {
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    private String bio;
-
-    private String avatarUrl;
-
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", unique = true, nullable = false)
-    private User user;
-}
-```
-
----
-
-### Ví dụ 2.3: @ManyToMany với extra columns
-
-**Vấn đề:** Bảng trung gian cần thêm columns (created_at, created_by)
-
-**Giải pháp:** Tạo entity cho bảng trung gian
-
-```java
-// ❌ KHÔNG THỂ thêm columns vào @ManyToMany thuần
-@ManyToMany
-@JoinTable(
-    name = "user_courses",
-    // Không thể thêm created_at ở đây!
-)
-```
-
-**Đúng:**
-```java
-@Entity
-public class User {
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    private String name;
+    private String status = "active";
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserCourse> userCourses = new ArrayList<>();
+    private List<Order> orders = new ArrayList<>();
 
-    // Convenience method
-    public void enrollInCourse(Course course) {
-        UserCourse uc = new UserCourse(this, course);
-        userCourses.add(uc);
-    }
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    // Constructors, getters, setters
 }
 
 @Entity
-public class Course {
+@Table(name = "orders")
+public class Order {
     @Id
-    @GeneratedValue
-    private Long id;
-
-    private String name;
-
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserCourse> userCourses = new ArrayList<>();
-
-    public int getEnrolledCount() {
-        return userCourses.size();
-    }
-}
-
-// Entity trung gian
-@Entity
-@Table(name = "user_courses")
-public class UserCourse {
-    @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    private String status;
 
-    @Column(name = "enrolled_at")
-    private LocalDateTime enrolledAt;
+    @Column(name = "total_amount")
+    private BigDecimal totalAmount;
 
-    @Column(name = "completed")
-    private boolean completed;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> items = new ArrayList<>();
 
-    @Column(name = "completed_at")
-    private LocalDateTime completedAt;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    // Constructors
-    public UserCourse() {}
-
-    public UserCourse(User user, Course course) {
-        this.user = user;
-        this.course = course;
-        this.enrolledAt = LocalDateTime.now();
-        this.completed = false;
-    }
-
-    // Getters, Setters
-}
-```
-
----
-
-## 📁 BÀI 3: FETCH TYPES - THỰC TẾ
-
-### Ví dụ 3.1: LazyInitializationException và cách fix
-
-**Scenario:** API trả về User với posts
-
-```java
-// ❌ SAI: Gặp LazyInitializationException
-@RestController
-@RequestMapping("/api/users")
-public class UserController {
-
-    @Autowired
-    private UserService userService;
-
-    @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
-        User user = userService.findById(id);
-        return user;  // OK
-    }
-
-    @GetMapping("/{id}/with-posts")
-    public User getUserWithPosts(@PathVariable Long id) {
-        User user = userService.findById(id);
-        // Access posts outside transaction!
-        return user;  // ❌ Khi serialize JSON, getPosts() bị call → Exception!
-    }
+    // Constructors, getters, setters
 }
 
-@Service
-public class UserService {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Transactional(readOnly = true)
-    public User findById(Long id) {
-        return userRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
-    }
-}
-```
-
-**Error:**
-```
-org.hibernate.LazyInitializationException:
-could not initialize proxy - no Session
-```
-
----
-
-**Fix 1: JOIN FETCH trong repository**
-
-```java
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query("SELECT DISTINCT u FROM User u JOIN FETCH u.posts WHERE u.id = :id")
-    Optional<User> findByIdWithPosts(@Param("id") Long id);
+    // Derived query methods
+    Optional<User> findByEmail(String email);
+    List<User> findByStatus(String status);
+    List<User> findByStatusAndCreatedAtAfter(String status, LocalDateTime date);
 
-    @Query("SELECT DISTINCT u FROM User u JOIN FETCH u.posts WHERE u.email = :email")
-    Optional<User> findByEmailWithPosts(@Param("email") String email);
+    // With pagination
+    Page<User> findByStatus(String status, Pageable pageable);
+
+    // With sorting
+    List<User> findByStatusOrderByCreatedAtDesc(String status);
+
+    // Custom query
+    @Query("SELECT u FROM User u JOIN FETCH u.orders WHERE u.id = :id")
+    Optional<User> findByIdWithOrders(@Param("id") Long id);
+
+    // Native query
+    @Query(value = "SELECT * FROM users WHERE email LIKE %:domain", nativeQuery = true)
+    List<User> findByEmailDomain(@Param("domain") String domain);
+
+    // Update query
+    @Modifying
+    @Transactional
+    @Query("UPDATE User u SET u.status = :status WHERE u.id = :id")
+    int updateStatus(@Param("id") Long id, @Param("status") String status);
+
+    // Delete query
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM User u WHERE u.status = :status")
+    int deleteByStatus(@Param("status") String status);
 }
 
-@Service
-public class UserService {
+public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    @Autowired
-    private UserRepository userRepository;
+    List<Order> findByUserId(Long userId);
 
-    public User findByIdWithPosts(Long id) {
-        return userRepository.findByIdWithPosts(id)
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
-    }
-}
-```
+    List<Order> findByStatus(String status);
 
----
+    @Query("SELECT o FROM Order o JOIN FETCH o.items WHERE o.id = :id")
+    Optional<Order> findByIdWithItems(@Param("id") Long id);
 
-**Fix 2: @Transactional ở controller layer (không khuyến khích)**
+    // Aggregation query
+    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.user.id = :userId")
+    BigDecimal getTotalSpentByUser(@Param("userId") Long userId);
 
-```java
-@RestController
-public class UserController {
-
-    @Autowired
-    private UserService userService;
-
-    @GetMapping("/{id}/with-posts")
-    @Transactional(readOnly = true)  // Giữ transaction mở
-    public User getUserWithPosts(@PathVariable Long id) {
-        User user = userService.findById(id);
-        Hibernate.initialize(user.getPosts());  // Force load
-        return user;
-    }
-}
-```
-
----
-
-**Fix 3: DTO projection (BEST PRACTICE)**
-
-```java
-// DTO interface
-public interface UserWithPostsDTO {
-    Long getId();
-    String getName();
-    String getEmail();
-    List<PostDTO> getPosts();
-
-    interface PostDTO {
-        Long getId();
-        String getTitle();
-        String getContent();
-        LocalDateTime getCreatedAt();
-    }
-}
-
-// Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-
+    // Monthly revenue
     @Query("""
-        SELECT u.id as id,
-               u.name as name,
-               u.email as email,
-               p.id as posts.id,
-               p.title as posts.title,
-               p.content as posts.content,
-               p.createdAt as posts.createdAt
-        FROM User u
-        LEFT JOIN u.posts p
-        WHERE u.id = :id
+        SELECT FUNCTION('DATE_TRUNC', 'month', o.createdAt) as month,
+               SUM(o.totalAmount) as total
+        FROM Order o
+        WHERE o.status != 'cancelled'
+        GROUP BY FUNCTION('DATE_TRUNC', 'month', o.createdAt)
+        ORDER BY month DESC
         """)
-    Optional<UserWithPostsDTO> findDTOById(@Param("id") Long id);
-}
-
-// Service
-@Service
-public class UserService {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    public UserWithPostsDTO findDTOById(Long id) {
-        return userRepository.findDTOById(id)
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
-    }
-}
-
-// Controller
-@RestController
-public class UserController {
-
-    @Autowired
-    private UserService userService;
-
-    @GetMapping("/{id}")
-    public UserWithPostsDTO getUser(@PathVariable Long id) {
-        return userService.findDTOById(id);
-    }
+    List<Object[]> getMonthlyRevenue();
 }
 ```
 
-**Benefits của DTO:**
-- ✅ Chỉ select fields cần thiết
-- ✅ Không có lazy loading issues
-- ✅ Dễ versioning API
-- ✅ Tránh expose entity internals
-
 ---
 
-## 📁 BÀI 4: N+1 PROBLEM - DEMO VÀ FIX
-
-### Ví dụ 4.1: Tạo dữ liệu test
+### 3.2 Spring Data MongoDB Repository
 
 ```java
-@Component
-public class DataGenerator implements ApplicationRunner {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Override
-    public void run(ApplicationArguments args) {
-        // Tạo 100 users, mỗi user có 5 posts
-        for (int i = 1; i <= 100; i++) {
-            User user = new User("User " + i, "user" + i + "@example.com");
-            userRepository.save(user);
-
-            for (int j = 1; j <= 5; j++) {
-                Post post = new Post("Post " + j + " by User " + i, "Content...");
-                post.setUser(user);
-                user.addPost(post);
-            }
-        }
-    }
-}
-```
-
----
-
-### Ví dụ 4.2: Demo N+1 problem
-
-```java
-@RestController
-@RequestMapping("/api/demo")
-public class NPlusOneDemoController {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    /**
-     * ❌ N+1 PROBLEM: 1 + 100 = 101 queries!
-     */
-    @GetMapping("/users-naive")
-    public List<UserDTO> getAllUsersWithPostCount() {
-        List<User> users = userRepository.findAll();
-
-        return users.stream().map(user -> {
-            UserDTO dto = new UserDTO();
-            dto.setId(user.getId());
-            dto.setName(user.getName());
-            dto.setPostCount(user.getPosts().size());  // ❌ Trigger N queries!
-            return dto;
-        }).collect(Collectors.toList());
-    }
-
-    /**
-     * ✅ FIX 1: JOIN FETCH
-     */
-    @GetMapping("/users-fetch")
-    public List<UserDTO> getAllUsersWithPostCountFixed() {
-        List<User> users = userRepository.findAllWithPosts();  // 1 query
-
-        return users.stream().map(user -> {
-            UserDTO dto = new UserDTO();
-            dto.setId(user.getId());
-            dto.setName(user.getName());
-            dto.setPostCount(user.getPosts().size());
-            return dto;
-        }).collect(Collectors.toList());
-    }
-
-    /**
-     * ✅ FIX 2: COUNT trong query
-     */
-    @GetMapping("/users-count")
-    public List<UserPostCountDTO> getAllUsersWithPostCountOptimized() {
-        return userRepository.findAllWithPostCount();
-    }
-}
-
-// Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-
-    // Fix 1: JOIN FETCH
-    @Query("SELECT DISTINCT u FROM User u JOIN FETCH u.posts")
-    List<User> findAllWithPosts();
-
-    // Fix 2: COUNT aggregate
-    @Query("""
-        SELECT new com.example.dto.UserPostCountDTO(
-            u.id,
-            u.name,
-            COUNT(p.id)
-        )
-        FROM User u
-        LEFT JOIN u.posts p
-        GROUP BY u.id, u.name
-        """)
-    List<UserPostCountDTO> findAllWithPostCount();
-}
-
-// DTO
-public class UserPostCountDTO {
-    private Long id;
-    private String name;
-    private Long postCount;
-
-    public UserPostCountDTO(Long id, String name, Long postCount) {
-        this.id = id;
-        this.name = name;
-        this.postCount = postCount;
-    }
-
-    // Getters
-}
-```
-
----
-
-### Ví dụ 4.3: Enable SQL logging để debug
-
-```yaml
-# application.yml
-spring:
-  jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        use_sql_comments: true
-        generate_statistics: true
-
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Show parameters
-```
-
-**Output khi chạy N+1:**
-```
-Hibernate:
-    select
-        u0_.id as id1_0_,
-        u0_.name as name2_0_,
-        u0_.email as email3_0_
-    from users u0_
-
-Hibernate:
-    select
-        p0_.id as id1_1_0_,
-        p0_.title as title2_1_0_,
-        p0_.content as content3_1_0_,
-        p0_.user_id as user_id4_1_0_
-    from posts p0_
-    where
-        p0_.user_id = ?   -- Parameter: 1
-
-Hibernate:
-    select
-        p0_.id as id1_1_0_,
-        p0_.title as title2_1_0_,
-        p0_.content as content3_1_0_,
-        p0_.user_id as user_id4_1_0_
-    from posts p0_
-    where
-        p0_.user_id = ?   -- Parameter: 2
-
-... (100 times!)
-```
-
----
-
-### Ví dụ 4.4: @BatchSize để fix N+1
-
-```java
-@Entity
+@Document(collection = "users")
 public class User {
     @Id
-    @GeneratedValue
-    private Long id;
+    private String id;
+
+    @Indexed(unique = true)
+    private String email;
+
+    private String fullName;
+
+    private String status;
+
+    private List<String> roles;
+
+    @Embedded
+    private Profile profile;
+
+    @Field("created_at")
+    private LocalDateTime createdAt;
+
+    // Constructors, getters, setters
+
+    @Embeddable
+    public static class Profile {
+        private String avatar;
+        private String bio;
+
+        @Embedded
+        private Location location;
+
+        // Getters, setters
+    }
+
+    @Embeddable
+    public static class Location {
+        private String city;
+        private String country;
+        // Getters, setters
+    }
+}
+
+@Document(collection = "products")
+public class Product {
+    @Id
+    private String id;
 
     private String name;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    @BatchSize(size = 10)  // Load 10 users cùng lúc
-    private List<Post> posts;
-}
-```
+    private String description;
 
-**SQL với @BatchSize(10):**
-```sql
--- Thay vì 100 queries riêng lẻ
--- Chỉ 10 queries với IN clause
-SELECT * FROM posts WHERE user_id IN (1,2,3,4,5,6,7,8,9,10);
-SELECT * FROM posts WHERE user_id IN (11,12,13,14,15,16,17,18,19,20);
-...
-```
+    private BigDecimal price;
 
----
+    private String category;
 
-## 📁 BÀI 5: CACHING DEMO
+    private List<String> tags;
 
-### Ví dụ 5.1: Level 1 Cache
+    private Integer stock;
 
-```java
-@Service
-@Transactional
-public class L1CacheDemo {
+    private String status;
 
-    @Autowired
-    private EntityManager entityManager;
+    private List<Review> reviews;
 
-    public void demonstrateL1Cache() {
-        System.out.println("=== L1 CACHE DEMO ===");
+    @Field("created_at")
+    private LocalDateTime createdAt;
 
-        // Query 1: Load từ DB
-        User user1 = entityManager.find(User.class, 1L);
-        System.out.println("Loaded user1: " + user1.getName());
+    // Constructors, getters, setters
 
-        // Query 2: Load từ L1 cache
-        User user2 = entityManager.find(User.class, 1L);
-        System.out.println("Loaded user2: " + user2.getName());
-
-        // user1 == user2 (cùng reference trong persistence context)
-        System.out.println("Same reference? " + (user1 == user2));  // true
+    @Embeddable
+    public static class Review {
+        private String userId;
+        private String userName;
+        private Integer rating;
+        private String comment;
+        private LocalDateTime createdAt;
+        // Getters, setters
     }
 }
-```
 
-**SQL:**
-```sql
--- Chỉ 1 query
-SELECT * FROM users WHERE id = 1;
-```
+public interface UserRepository extends MongoRepository<User, String> {
 
----
+    // Derived query methods
+    Optional<User> findByEmail(String email);
+    List<User> findByStatus(String status);
+    List<User> findByStatusAndCreatedAtAfter(String status, LocalDateTime date);
 
-### Ví dụ 5.2: Level 2 Cache với Ehcache
+    // With sorting
+    List<User> findByStatusOrderByCreatedAtDesc(String status);
 
-**Step 1: Dependencies**
-```xml
-<dependency>
-    <groupId>org.hibernate.orm</groupId>
-    <artifactId>hibernate-jcache</artifactId>
-</dependency>
-<dependency>
-    <groupId>org.ehcache</groupId>
-    <artifactId>ehcache</artifactId>
-</dependency>
-```
+    // Array contains
+    List<User> findByRolesContaining(String role);
 
-**Step 2: Configuration**
-```yaml
-spring:
-  jpa:
-    properties:
-      hibernate:
-        cache:
-          use_second_level_cache: true
-          use_query_cache: true
-          region:
-            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
-        jakarta:
-          cache:
-            missing_cache_strategy: create
-  cache:
-    jcache:
-      config: classpath:ehcache.xml
-```
+    // Nested field
+    List<User> findByProfileLocationCity(String city);
 
-**Step 3: ehcache.xml**
-```xml
-<config xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-        xmlns='http://www.ehcache.org/v3'
-        xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.0.xsd">
+    // Custom query with @Query
+    @Query("{ 'status': ?0, 'profile.location.city': ?1 }")
+    List<User> findByStatusAndCity(String status, String city);
 
-    <cache alias="com.example.User">
-        <heap unit="entries">1000</heap>
-        <expiry>
-            <ttl unit="minutes">30</ttl>
-        </expiry>
-    </cache>
+    // Aggregation
+    @Aggregation(pipeline = {
+        "{ $match: { status: ?0 } }",
+        "{ $group: { _id: '$profile.location.city', count: { $sum: 1 } } }"
+    })
+    List<CityUserCount> getUserCountByCity(String status);
 
-    <cache alias="com.example.Post">
-        <heap unit="entries">5000</heap>
-        <expiry>
-            <ttl unit="minutes">10</ttl>
-        </expiry>
-    </cache>
-</config>
-```
-
-**Step 4: Enable cache cho entity**
-```java
-@Entity
-@Cacheable
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class User {
-    // ...
-}
-```
-
-**Step 5: Demo**
-```java
-@Service
-public class L2CacheDemo {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private EntityManager entityManager;
-
-    public void demonstrateL2Cache() {
-        // Session 1
-        System.out.println("=== Session 1 ===");
-        User user1 = userRepository.findById(1L).get();
-        System.out.println("Loaded: " + user1.getName());
-
-        entityManager.clear();  // Clear L1 cache
-
-        // Session 2 (L1 cache cleared, but L2 still has data)
-        System.out.println("=== Session 2 ===");
-        User user2 = userRepository.findById(1L).get();
-        System.out.println("Loaded: " + user2.getName());
-        // L2 cache hit - no SQL query!
+    interface CityUserCount {
+        String getCity();
+        Long getCount();
     }
 }
+
+public interface ProductRepository extends MongoRepository<Product, String> {
+
+    List<Product> findByCategory(String category);
+
+    List<Product> findByStatus(String status);
+
+    List<Product> findByTagsContaining(String tag);
+
+    List<Product> findByPriceBetween(BigDecimal min, BigDecimal max);
+
+    @Query("{ 'price': { $gte: ?0, $lte: ?1 }, 'status': 'active' }")
+    List<Product> findByPriceRange(BigDecimal min, BigDecimal max);
+
+    // Text search
+    @TextSearch
+    List<Product> findByNameOrDescription(String search);
+
+    // Geo query
+    List<Product> findByLocationNear(Point location, Distance distance);
+}
 ```
 
 ---
 
-## 📝 BÀI TẬP THỰC HÀNH
+## TÓM TẮT
 
-Xem `03-exercises.md` để làm bài tập Phase 2.
+Các ví dụ trong file này bao phủ:
 
----
+### SQL
+- ✅ Schema design cho e-commerce
+- ✅ Các queries phổ biến (JOINs, aggregations, window functions)
+- ✅ Query optimization techniques
+- ✅ Recursive CTEs cho hierarchy
 
-## 🔜 TIẾP THEO
+### MongoDB
+- ✅ Document schemas (embedded vs referenced)
+- ✅ CRUD operations với các operators
+- ✅ Aggregation pipeline examples
+- ✅ Index types và usage
 
-Sau khi đọc xong examples, làm bài tập thực hành ở file tiếp theo.
+### Spring Data Integration
+- ✅ Repository interfaces cho JPA và MongoDB
+- ✅ Custom queries với @Query và @Aggregation
+- ✅ Entity/Document mapping

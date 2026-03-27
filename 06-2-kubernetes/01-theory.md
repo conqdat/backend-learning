@@ -2,6 +2,64 @@
 
 > **Thời gian:** 3 tuần
 > **Mục tiêu:** Deploy và quản lý Spring Boot applications trên Kubernetes
+>
+> **Tham khảo:** [roadmap.sh/kubernetes](https://roadmap.sh/kubernetes)
+
+---
+
+## 📚 BÀI 0: KUBERNETES OVERVIEW
+
+### 0.1 Tại sao cần Kubernetes?
+
+```
+Vấn đề khi chạy containers thủ công:
+┌─────────────────────────────────────────────────────────────┐
+│  ❌ Manual Container Management                              │
+│  - Làm gì khi container crash?                               │
+│  - Làm gì khi server hết tài nguyên?                         │
+│  - Làm sao để scale khi traffic tăng?                        │
+│  - Làm sao để update không downtime?                         │
+│  - Làm sao để quản lý 100+ containers?                       │
+└─────────────────────────────────────────────────────────────┘
+
+Giải pháp: Kubernetes
+┌─────────────────────────────────────────────────────────────┐
+│  ✅ Kubernetes Benefits                                      │
+│  - Self-healing: Auto restart failed containers              │
+│  - Auto-scaling: Scale up/down based on load                 │
+│  - Load balancing: Distribute traffic automatically          │
+│  - Rolling updates: Zero-downtime deployments                │
+│  - Service discovery: DNS-based communication                │
+│  - Resource optimization: Efficient cluster utilization      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 0.2 Kubernetes vs Alternatives
+
+| Solution | Use Case | Complexity |
+|----------|----------|------------|
+| **Docker Swarm** | Small projects, simple setups | Low |
+| **Kubernetes** | Production, microservices, multi-cloud | High |
+| **Nomad** | Hashicorp stack users, flexible workloads | Medium |
+| **ECS/Fargate** | AWS-only workloads | Low-Medium |
+| **OpenShift** | Enterprise, need support | High |
+
+### 0.3 Khi nào KHÔNG cần Kubernetes?
+
+```
+❌ KHÔNG dùng Kubernetes khi:
+- Ứng dụng đơn giản, 1-2 services
+- Team nhỏ, không có DevOps expertise
+- Chạy trên single server
+- Không cần auto-scaling
+- Ngân sách hạn chế (K8s master node cost)
+
+✅ Alternatives:
+- Docker Compose cho development
+- Heroku/Vercel/Railway cho simple apps
+- AWS ECS/Fargate cho AWS-only workloads
+- DigitalOcean App Platform
+```
 
 ---
 
@@ -700,17 +758,397 @@ spec:
 
 ---
 
-## 📚 TÓM TẮT PHASE 06.5
+## 📚 BÀI 9: RESOURCE MANAGEMENT
 
-1. ✅ Kubernetes architecture (Control Plane, Worker Nodes)
-2. ✅ Pods & Deployments
-3. ✅ Services (ClusterIP, LoadBalancer, NodePort)
-4. ✅ Ingress & Service Discovery
-5. ✅ ConfigMaps & Secrets
-6. ✅ Auto-scaling (HPA, VPA)
-7. ✅ StatefulSets & Persistent Volumes
-8. ✅ Helm Charts
-9. ✅ RBAC & Security best practices
+### 9.1 Resource Requests & Limits
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+spec:
+  containers:
+  - name: myapp
+    image: myapp:1.0.0
+    resources:
+      requests:
+        memory: "512Mi"    # Guaranteed memory
+        cpu: "250m"        # 0.25 CPU core
+      limits:
+        memory: "1Gi"      # Max memory before OOMKilled
+        cpu: "500m"        # Max CPU (throttled if exceeded)
+```
+
+**Resource Types:**
+
+| Resource | Description | Unit |
+|----------|-------------|------|
+| **cpu** | CPU cores | millicores (1000m = 1 core) |
+| **memory** | RAM | Mi, Gi |
+| **ephemeral-storage** | Temporary storage | Mi, Gi |
+
+**Quality of Service (QoS) Classes:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Guaranteed (Highest priority)                               │
+│  - requests = limits for all containers                      │
+│  - Last to be evicted                                        │
+├─────────────────────────────────────────────────────────────┤
+│  Burstable (Medium priority)                                 │
+│  - requests < limits                                         │
+│  - Evicted after Guaranteed pods                             │
+├─────────────────────────────────────────────────────────────┤
+│  BestEffort (Lowest priority)                                │
+│  - No requests/limits specified                              │
+│  - First to be evicted                                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 9.2 Resource Quotas
+
+```yaml
+# Limit resources in namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: default
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi
+    pods: "20"
+    services: "10"
+    secrets: "20"
+    configmaps: "20"
+```
+
+---
+
+## 📚 BÀI 10: MONITORING & OBSERVABILITY
+
+### 10.1 Kubernetes Metrics
+
+```bash
+# Install metrics-server
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+# View node metrics
+kubectl top nodes
+
+# View pod metrics
+kubectl top pods
+
+# View pod metrics with labels
+kubectl top pods -l app=myapp
+```
+
+### 10.2 Health Checks & Probes
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  failureThreshold: 3
+  timeoutSeconds: 5
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+startupProbe:  # For slow-starting applications
+  httpGet:
+    path: /actuator/health
+    port: 8080
+  failureThreshold: 30
+  periodSeconds: 10
+```
+
+### 10.3 Debugging Commands
+
+```bash
+# View pod status
+kubectl get pods
+kubectl get pods -o wide
+kubectl get pods --show-labels
+
+# Describe pod (events, conditions)
+kubectl describe pod <pod-name>
+
+# View logs
+kubectl logs <pod-name>
+kubectl logs -f <pod-name>           # Follow
+kubectl logs --previous <pod-name>   # Previous instance
+
+# Execute in pod
+kubectl exec -it <pod-name> -- bash
+kubectl exec -it <pod-name> -- sh    # For Alpine
+
+# Port forwarding
+kubectl port-forward <pod-name> 8080:8080
+
+# View events
+kubectl get events --sort-by='.lastTimestamp'
+kubectl get events -n <namespace>
+
+# View all resources in namespace
+kubectl get all
+```
+
+---
+
+## 📚 BÀI 11: SCHEDULING & TAINTS
+
+### 11.1 Node Selector
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+spec:
+  nodeSelector:
+    disktype: ssd
+    zone: us-east-1a
+  containers:
+  - name: myapp
+    image: myapp:1.0.0
+```
+
+### 11.2 Taints and Tolerations
+
+```bash
+# Taint a node
+kubectl taint nodes node1 key=value:NoSchedule
+
+# Remove taint
+kubectl taint nodes node1 key=value:NoSchedule-
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+spec:
+  tolerations:
+  - key: "key"
+    operator: "Equal"
+    value: "value"
+    effect: "NoSchedule"
+  containers:
+  - name: myapp
+    image: myapp:1.0.0
+```
+
+### 11.3 Affinity Rules
+
+```yaml
+# Node Affinity
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: zone
+            operator: In
+            values:
+            - us-east-1a
+            - us-east-1b
+
+# Pod Affinity
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - redis
+        topologyKey: kubernetes.io/hostname
+```
+
+---
+
+## 📚 BÀI 12: DEPLOYMENT PATTERNS
+
+### 12.1 Rolling Update (Default)
+
+```yaml
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1         # Extra pods during update
+      maxUnavailable: 0   # Pods unavailable during update
+```
+
+### 12.2 Blue-Green Deployment
+
+```yaml
+# Blue deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-blue
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:1.0.0  # Old version
+
+# Green deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-green
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:2.0.0  # New version
+
+# Service switches from blue to green
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  selector:
+    app: myapp-green  # Change from blue to green
+```
+
+### 12.3 Canary Deployment
+
+```yaml
+# Main deployment (90% traffic)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-stable
+spec:
+  replicas: 9
+  template:
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:1.0.0
+
+# Canary deployment (10% traffic)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-canary
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:2.0.0
+
+# Service selects both (weighted by replicas)
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  selector:
+    app: myapp  # Both deployments have this label
+```
+
+### 12.4 GitOps with ArgoCD (optional)
+
+```yaml
+# Application manifest for ArgoCD
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myapp
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/username/myapp-k8s.git
+    targetRevision: HEAD
+    path: manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+```
+
+---
+
+## 📚 BÀI 13: CLUSTER MANAGEMENT
+
+### 13.1 Multi-Cluster Management
+
+```bash
+# Configure multiple clusters
+kubectl config set-cluster cluster1 --server=https://cluster1:6443
+kubectl config set-cluster cluster2 --server=https://cluster2:6443
+
+# Set contexts
+kubectl config set-context ctx-cluster1 --cluster=cluster1 --user=admin
+kubectl config set-context ctx-cluster2 --cluster=cluster2 --user=admin
+
+# Switch between clusters
+kubectl config use-context ctx-cluster1
+kubectl config use-context ctx-cluster2
+```
+
+### 13.2 Managed Kubernetes Options
+
+| Provider | Service | Notes |
+|----------|---------|-------|
+| AWS | EKS | Most popular, integrates with AWS |
+| GCP | GKE | Best K8s experience (Google created K8s) |
+| Azure | AKS | Good for Azure shops |
+| DigitalOcean | DOKS | Simple, affordable |
+| Linode | LKE | Budget-friendly |
+
+---
+
+## 📚 TÓM TẮT
+
+1. ✅ Kubernetes overview & when to use
+2. ✅ Kubernetes architecture (Control Plane, Worker Nodes)
+3. ✅ Pods & Deployments
+4. ✅ Services (ClusterIP, LoadBalancer, NodePort)
+5. ✅ Ingress & Service Discovery
+6. ✅ ConfigMaps & Secrets
+7. ✅ Auto-scaling (HPA, VPA, Cluster Autoscaler)
+8. ✅ StatefulSets & Persistent Volumes
+9. ✅ Resource management (requests, limits, quotas)
+10. ✅ Monitoring & debugging (metrics, logs, probes)
+11. ✅ Scheduling (node selector, taints, affinity)
+12. ✅ Deployment patterns (rolling, blue-green, canary)
+13. ✅ Helm Charts
+14. ✅ RBAC & Security best practices
+15. ✅ Managed Kubernetes options
 
 ---
 

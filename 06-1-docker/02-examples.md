@@ -758,8 +758,331 @@ docker run -p 8081:8080 myapp
 
 ---
 
+## 📁 BÀI 8: DOCKER REGISTRY & IMAGE MANAGEMENT
+
+### Ví dụ 8.1: Push to Docker Hub
+
+```bash
+# Login to Docker Hub
+docker login -u username
+
+# Tag image
+docker tag myapp:1.0.0 username/myapp:1.0.0
+docker tag myapp:1.0.0 username/myapp:latest
+
+# Push image
+docker push username/myapp:1.0.0
+docker push username/myapp:latest
+
+# Pull image
+docker pull username/myapp:1.0.0
+```
+
+### Ví dụ 8.2: Push to Amazon ECR
+
+```bash
+# Create repository
+aws ecr create-repository --repository-name myapp --region us-east-1
+
+# Login to ECR
+aws ecr get-login-password --region us-east-1 | \
+  docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
+
+# Tag image
+docker tag myapp:1.0.0:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/myapp:1.0.0
+
+# Push image
+docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/myapp:1.0.0
+```
+
+### Ví dụ 8.3: Push to GitHub Container Registry (ghcr.io)
+
+```bash
+# Login (using Personal Access Token with read:packages, write:packages scope)
+echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
+
+# Tag image
+docker tag myapp:1.0.0 ghcr.io/username/myapp:1.0.0
+
+# Push image
+docker push ghcr.io/username/myapp:1.0.0
+```
+
+### Ví dụ 8.4: Image Tagging Best Practices
+
+```bash
+# Good: Semantic versioning
+docker tag myapp:1.2.3 myapp:v1.2.3
+
+# Good: Environment-specific
+docker tag myapp:1.2.3 myapp:staging
+docker tag myapp:1.2.3 myapp:production
+
+# Good: Git commit reference
+docker tag myapp:1.2.3 myapp:abc123def
+
+# Bad: Using :latest in production
+docker tag myapp:latest  # Avoid!
+
+# Multi-arch images
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -t myapp:1.0.0 --push .
+```
+
+---
+
+## 📁 BÀI 9: DOCKER LOGGING & DEBUGGING
+
+### Ví dụ 9.1: Logging Commands
+
+```bash
+# View logs
+docker logs container_name
+
+# Follow logs (tail -f)
+docker logs -f container_name
+
+# Show last N lines
+docker logs --tail 100 container_name
+
+# Show timestamps
+docker logs -t container_name
+
+# Show logs since time
+docker logs --since 2024-01-15T10:00:00 container_name
+
+# Show logs for last 5 minutes
+docker logs --since 5m container_name
+
+# Show logs until time
+docker logs --until 2024-01-15T12:00:00 container_name
+```
+
+### Ví dụ 9.2: Debugging Commands
+
+```bash
+# Inspect container details
+docker inspect container_name
+
+# View container processes
+docker top container_name
+
+# View live resource usage
+docker stats container_name
+docker stats  # All containers
+
+# Copy files from container
+docker cp container_name:/app/logs/app.log ./app.log
+
+# Copy files to container
+docker cp ./config.yml container_name:/app/config.yml
+
+# Execute command in running container
+docker exec -it container_name sh
+docker exec -it container_name bash  # If bash available
+
+# Execute as specific user
+docker exec -u root container_name bash
+
+# Check container network
+docker exec container_name netstat -tlnp
+docker exec container_name curl -s localhost:8080/health
+
+# Show changed files in container
+docker diff container_name
+```
+
+### Ví dụ 9.3: Debug with Temporary Container
+
+```bash
+# Run container with entrypoint override
+docker run -it --entrypoint /bin/bash myimage
+
+# Run with different command
+docker run --rm myimage java -version
+
+# Run with environment override
+docker run -e DEBUG=true --rm myimage
+
+# Run with volume for log inspection
+docker run --rm -v /var/log/myapp:/logs myimage ls -la /logs
+
+# Inspect image layers
+docker history myimage:1.0.0
+docker history --no-trunc myimage:1.0.0  # Full commands
+```
+
+---
+
+## 📁 BÀI 10: DOCKER IN CI/CD
+
+### Ví dụ 10.1: GitHub Actions
+
+```yaml
+# .github/workflows/docker-build.yml
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+```
+
+### Ví dụ 10.2: GitLab CI
+
+```yaml
+# .gitlab-ci.yml
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  DOCKER_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+
+build:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $DOCKER_IMAGE .
+    - docker push $DOCKER_IMAGE
+  only:
+    - main
+    - tags
+
+test:
+  stage: test
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker run --rm $DOCKER_IMAGE ./mvnw test
+  only:
+    - merge_requests
+
+deploy:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  script:
+    - kubectl set image deployment/myapp myapp=$DOCKER_IMAGE
+  only:
+    - main
+```
+
+### Ví dụ 10.3: Docker Compose in CI
+
+```yaml
+# docker-compose.test.yml
+version: '3.8'
+
+services:
+  app:
+    build: .
+    environment:
+      - SPRING_PROFILES_ACTIVE=test
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/testdb
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=testdb
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+```
+
+```yaml
+# .github/workflows/test.yml
+name: Run Tests with Docker Compose
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tests with Docker Compose
+        run: |
+          docker-compose -f docker-compose.test.yml up \
+            --abort-on-container-exit \
+            --exit-code-from app
+
+      - name: Cleanup
+        if: always()
+        run: docker-compose -f docker-compose.test.yml down -v
+```
+
+---
+
 ## 🔗 TÀI LIỆU THAM KHẢO
 
 1. [Docker Documentation](https://docs.docker.com/)
 2. [Dockerfile Best Practices](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)
 3. [roadmap.sh/docker](https://roadmap.sh/docker)
+4. [Docker Scan (Trivy)](https://aquasecurity.github.io/trivy/)
+5. [BuildKit Documentation](https://github.com/moby/buildkit)
