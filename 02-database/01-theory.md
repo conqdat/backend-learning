@@ -1689,3 +1689,47 @@ Sau khi học xong phần này, bạn cần nắm được:
 ### Next Steps
 - Đọc `02-examples.md` để xem code mẫu
 - Làm bài tập ở `03-exercises.md`
+
+---
+
+## 📚 TÀI LIỆU THAM KHẢO
+
+### SQL Fundamentals & Query Optimization
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Use The Index, Luke | [usetheindexluke.com](https://use-the-index-luke.com/) | SQL performance, indexing, query optimization |
+| SQL Tutorial | [SQLZoo](https://sqlzoo.net/) | Interactive SQL exercises |
+| PostgreSQL Tutorial | [postgresqltutorial.com](https://www.postgresqltutorial.com/) | Comprehensive PostgreSQL guide |
+
+### Advanced SQL & Performance
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Explain Analyze | [explain.depesz.com](https://explain.depesz.com/) | Visualize EXPLAIN output |
+| SQL Performance Tuning | [Brent Ozar](https://www.brentozar.com/) | SQL Server performance tips |
+| 10 Tips for Optimal PostgreSQL Indexes | [cybertec-postgresql.com](https://www.cybertec-postgresql.com/en/10-tips-for-optimal-postgresql-indexes/) | Index best practices |
+
+### MongoDB
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| MongoDB University | [university.mongodb.com](https://university.mongodb.com/) | Free MongoDB courses |
+| MongoDB Manual | [mongodb.com/docs](https://www.mongodb.com/docs/manual/) | Official documentation |
+| MongoDB Schema Design | [mongodb.com/docs](https://www.mongodb.com/docs/manual/data-modeling/) | Embedded vs referenced data |
+
+### JPA/Hibernate
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Vlad Mihalcea Blog | [vladmihalcea.com](https://vladmihalcea.com/) | Hibernate performance, best practices |
+| Hypersistence Utils | [vladmihalcea.com/hypersistence-utils](https://vladmihalcea.com/hypersistence-utils/) | Additional Hibernate utilities |
+| JPA Buddy | [jpa-buddy.com](https://jpa-buddy.com/) | JPA tools and tutorials |
+| Hibernate User Guide | [hibernate.org](https://hibernate.org/orm/documentation/) | Official Hibernate docs |
+
+### Database Design
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Database Design Best Practices | [Microsoft](https://learn.microsoft.com/en-us/sql/relational-databases/database-design/database-design-best-practices) | Relational design patterns |
+| Normalization | [wikipedia.org](https://en.wikipedia.org/wiki/Database_normalization) | 1NF, 2NF, 3NF, BCNF explained |

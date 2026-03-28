@@ -732,7 +732,109 @@ Is this accessed by multiple threads?"
 
 ---
 
-## 📚 TÓM TẮT PHASE 06.7
+## 📚 TÓM TẮT PHASE 06.7 (theo roadmap.sh/git-github)
+
+### Các chủ đề cần nắm vững:
+
+**1. Learn the Basics:**
+- ✅ What is Version Control?
+- ✅ Why use Version Control?
+- ✅ Git vs Other VCS
+- ✅ Installing Git Locally
+- ✅ What is a Repository
+- ✅ git init, git config
+- ✅ Local vs Global Config
+- ✅ Working Directory, Staging Area
+- ✅ Committing Changes
+- ✅ .gitignore
+- ✅ Viewing Commit History
+- ✅ Branching Basics (Creating, Renaming, Deleting, Checkout)
+- ✅ Merging Basics
+
+**2. Basic Collaboration:**
+- ✅ Creating GitHub Account
+- ✅ GitHub Interface
+- ✅ Setting up Profile
+- ✅ Creating Repositories
+- ✅ Profile Readme
+- ✅ Private vs Public
+- ✅ Git Remotes (Managing, Pushing/Pulling, Fetch without Merge)
+- ✅ Collaboration on GitHub
+- ✅ Forking vs Cloning
+- ✅ Issues, Pull Requests
+- ✅ PR from a Fork
+- ✅ Collaborators
+- ✅ Creating PR
+- ✅ Labelling Issues/PRs
+- ✅ Saved Replies, Mentions, Reactions, Commenting
+- ✅ Merge Strategies (Fast-Forward vs Non-FF, Handling Conflicts, Rebase, Squash)
+- ✅ Cherry Picking Commits
+
+**3. Best Practices:**
+- ✅ Commit Messages (conventional commits)
+- ✅ Branch Naming
+- ✅ PR Guidelines
+- ✅ Code Reviews
+- ✅ Contribution Guidelines
+- ✅ Markdown
+- ✅ Project Readme
+- ✅ GitHub Wikis
+- ✅ Clean Git History
+- ✅ Working in a Team
+- ✅ GitHub Organizations (Members, Teams)
+- ✅ GitHub Projects (Planning, Kanban, Roadmaps, Automations)
+- ✅ GitHub Discussions
+
+**4. Intermediate Git Topics:**
+- ✅ Git Stash Basics
+- ✅ History (Linear vs Non-Linear, HEAD, Detached HEAD, log options)
+- ✅ Undoing Changes (git revert, git reset --soft/--hard/--mixed)
+- ✅ Viewing Diffs (Commits, Branches, Staged/Unstaged)
+- ✅ Rewriting History (amend, rebase, filter-branch, push --force)
+- ✅ Tagging (Managing, Pushing, Checkout)
+- ✅ GitHub Releases
+- ✅ Git hooks (Client vs Server, Common Hooks)
+- ✅ Submodules
+- ✅ GitHub Workflow
+- ✅ GitHub CLI (Installation, Repo/Issue/PR Management)
+
+**5. GitHub Actions:**
+- ✅ YAML Syntax
+- ✅ Workflow Triggers
+- ✅ Scheduled Workflows
+- ✅ Workflow Runners
+- ✅ Workflow Context
+- ✅ Secrets and Env Vars
+- ✅ Caching Dependencies
+- ✅ Storing Artifacts
+- ✅ Workflow Status
+- ✅ Marketplace Actions
+- ✅ Usecases
+
+**6. Advanced Git Topics:**
+- ✅ Git Reflog
+- ✅ Git Bisect
+- ✅ Git Worktree
+- ✅ Git Attributes
+- ✅ Git LFS (Large File Storage)
+
+**7. GitHub Developer Tools:**
+- ✅ GitHub API
+- ✅ REST API
+- ✅ GraphQL API
+- ✅ Creating Apps
+- ✅ GitHub Apps
+- ✅ OAuth Apps
+- ✅ Webhooks
+
+**8. More GitHub Features:**
+- ✅ GitHub Sponsors
+- ✅ GitHub Pages (Deploying Static Websites, Custom Domains, Static Site Generators)
+- ✅ GitHub Gists
+- ✅ GitHub Packages
+- ✅ GitHub Codespaces
+
+---
 
 1. ✅ Git internals (blobs, trees, commits, refs)
 2. ✅ Branching strategies (Git Flow, GitHub Flow, Trunk-Based)

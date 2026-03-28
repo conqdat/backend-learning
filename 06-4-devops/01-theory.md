@@ -635,3 +635,107 @@ public class DatabaseService {
 ## 🔜 TIẾP THEO
 
 Phase 8: Capstone Project - Apply tất cả kiến thức!
+
+---
+
+## 📝 TÓM TẮT DEVOPS ROADMAP (theo roadmap.sh/devops)
+
+### Các chủ đề cần nắm vững:
+
+**1. Coding Fundamentals:**
+- ✅ Python (scripting, automation)
+- ✅ Go (cloud-native tools)
+- ✅ Bash/Shell scripting
+- ✅ Ruby (optional, for Chef/Puppet)
+- ✅ JavaScript/Node.js (optional)
+
+**2. System Environments:**
+- ✅ Linux (RHEL, Ubuntu, SUSE)
+- ✅ Unix, FreeBSD
+- ✅ Windows Server (basic knowledge)
+- ✅ Package Managers (apt, yum, apk)
+
+**3. Command Line:**
+- ✅ Bash scripting
+- ✅ PowerShell (for Windows environments)
+- ✅ Text Editors (Vim/Nano/Emacs)
+- ✅ Process/Performance Monitoring (top, htop, iostat)
+
+**4. Version Control:**
+- ✅ Git (branches, merges, rebasing)
+- ✅ GitHub, GitLab, Bitbucket
+
+**5. Networking:**
+- ✅ HTTP, HTTPS
+- ✅ DNS, SSH, SSL/TLS
+- ✅ OSI Model (7 layers)
+- ✅ Firewalls, Proxies
+- ✅ SMTP, IMAP, POP3S (email protocols)
+
+**6. Containerization:**
+- ✅ Docker (images, containers, volumes, networks)
+- ✅ LXC (Linux Containers)
+- ✅ Container security best practices
+
+**7. Cloud Platforms:**
+- ✅ AWS (EC2, S3, Lambda, RDS, VPC)
+- ✅ Azure (VMs, Blob Storage, Functions)
+- ✅ Google Cloud (Compute Engine, GCS)
+- ✅ Digital Ocean, Hetzner (smaller providers)
+- ✅ Heroku, Vercel, Netlify (PaaS)
+
+**8. Function-as-a-Service (Serverless):**
+- ✅ AWS Lambda
+- ✅ Azure Functions
+- ✅ Cloudflare Workers
+- ✅ Vercel Functions
+
+**9. Infrastructure as Code:**
+- ✅ Terraform (multi-cloud)
+- ✅ Pulumi (code-based IaC)
+- ✅ AWS CloudFormation
+- ✅ AWS CDK
+
+**10. Configuration Management:**
+- ✅ Ansible (agentless)
+- ✅ Chef (Ruby-based)
+- ✅ Puppet (declarative)
+
+**11. CI/CD Pipelines:**
+- ✅ Jenkins (classic, highly customizable)
+- ✅ GitHub Actions (modern, Git-integrated)
+- ✅ GitLab CI (integrated with GitLab)
+- ✅ Circle CI
+- ✅ TeamCity
+
+**12. Security:**
+- ✅ HashiCorp Vault (secrets management)
+- ✅ Sealed Secrets (Kubernetes)
+- ✅ Cloud-specific tools (AWS Secrets Manager, etc.)
+- ✅ SOPs (Standard Operating Procedures)
+
+**13. Observability:**
+- ✅ Prometheus (metrics collection)
+- ✅ Grafana (visualization, dashboards)
+- ✅ Zabbix (traditional monitoring)
+- ✅ Datadog (commercial APM)
+
+**14. Logging:**
+- ✅ Elastic Stack (ELK: Elasticsearch, Logstash, Kibana)
+- ✅ Splunk (commercial)
+- ✅ Graylog
+- ✅ Papertrail
+
+**15. Orchestration:**
+- ✅ GKE (Google Kubernetes Engine)
+- ✅ EKS (Elastic Kubernetes Service)
+- ✅ AKS (Azure Kubernetes Service)
+
+**16. Web Servers:**
+- ✅ Nginx (reverse proxy, load balancer)
+- ✅ Apache HTTP Server
+- ✅ Caddy (modern, auto-HTTPS)
+- ✅ IIS (Windows)
+- ✅ Tomcat (Java applications)
+- ✅ Load Balancers (HAProxy, ALB)
+- ✅ Caching Servers (Varnish, Redis)

@@ -667,3 +667,39 @@ Sau phase này, bạn cần nắm được:
 ## 🔜 TIẾP THEO
 
 Đọc `02-examples.md` để xem code mẫu thực tế!
+
+---
+
+## 📚 TÀI LIỆU THAM KHẢO
+
+### Caching Patterns & Strategies
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Caching Patterns | [microservices.io](https://microservices.io/patterns/data/cache-aside.html) | Cache-Aside, Read-Through, Write-Through |
+| Spring Cache Abstraction | [Spring Docs](https://docs.spring.io/spring-framework/docs/current/reference/html/integration.html#cache) | @Cacheable, @CacheEvict, @CachePut |
+| Caffeine Cache | [github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine) | High-performance in-memory cache |
+
+### Redis
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Redis Documentation | [redis.io/docs](https://redis.io/docs/) | Official Redis docs |
+| Redis University | [university.redis.io](https://university.redis.io/) | Free Redis courses |
+| Redis Design Patterns | [redis.io/docs](https://redis.io/docs/manual/design-patterns/) | Common Redis patterns |
+
+### Redis Use Cases
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Session Storage | [redis.io/sessions](https://redis.io/sessions/) | Store user sessions |
+| Leaderboards | [redis.io/leaderboards](https://redis.io/leaderboards/) | Sorted sets for rankings |
+| Rate Limiting | [redis.io/rate-limiting](https://redis.io/redisuse-cases/rate-limiting/) | Implement rate limiters |
+| Caching | [redis.io/caching](https://redis.io/use-cases/caching/) | Application caching strategies |
+
+### Distributed Locking
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Redlock Algorithm | [redis.io/redlock](https://redis.io/topics/distlock) | Distributed lock with Redis |
+| Spring Integration Redis Lock | [Spring Docs](https://docs.spring.io/spring-integration/reference/html/redis.html#redis-lock) | Redis-based locking |

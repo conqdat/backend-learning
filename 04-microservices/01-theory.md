@@ -622,3 +622,55 @@ Sau phase này, bạn cần nắm được:
 ## 🔜 TIẾP THEO
 
 Đọc `02-examples.md` để xem code mẫu thực tế!
+
+---
+
+## 📚 TÀI LIỆU THAM KHẢO
+
+### Microservices Fundamentals
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Microservices.io | [microservices.io](https://microservices.io/) | Patterns for microservices architecture |
+| Martin Fowler - Microservices | [martinfowler.com/microservices](https://martinfowler.com/articles/microservices.html) | Original microservices article |
+| Building Microservices (Book) | [O'Reilly](https://www.oreilly.com/library/view/building-microservices-2nd/9781492034018/) | Comprehensive guide by Sam Newman |
+
+### Service Communication
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Sync vs Async Communication | [microservices.io](https://microservices.io/patterns/communication-style.html) | When to use each approach |
+| Kafka Documentation | [kafka.apache.org](https://kafka.apache.org/documentation/) | Official Kafka docs |
+| Spring for Apache Kafka | [Spring Docs](https://docs.spring.io/spring-kafka/reference/html/) | Kafka integration with Spring |
+
+### Saga Pattern
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Saga Pattern | [microservices.io](https://microservices.io/patterns/data/saga.html) | Choreography vs Orchestration |
+| Implementing Sagas | [microservices.io](https://microservices.io/patterns/data/saga-implementation.html) | Code examples |
+| Saga Best Practices | [camunda.com](https://camunda.com/learn/microservices/saga-pattern/) | Process orchestration guide |
+
+### API Gateway
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Spring Cloud Gateway | [Spring Docs](https://docs.spring.io/spring-cloud-gateway/reference/html/) | Official documentation |
+| API Gateway Patterns | [microservices.io](https://microservices.io/patterns/apigateway.html) | When and how to use |
+| Kong API Gateway | [konghq.com](https://konghq.com/) | Alternative API gateway |
+
+### Service Discovery & Configuration
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Service Discovery | [microservices.io](https://microservices.io/patterns/service-registry.html) | Service registry pattern |
+| Spring Cloud Netflix | [Spring Docs](https://spring.io/projects/spring-cloud-netflix) | Eureka, Hystrix, Zuul |
+| Config Server | [Spring Docs](https://spring.io/projects/spring-cloud-config) | Centralized configuration |
+
+### Resilience Patterns
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Circuit Breaker Pattern | [microservices.io](https://microservices.io/patterns/reliability/circuit-breaker.html) | Handle failures gracefully |
+| Resilience4j | [resilience4j.readme.io](https://resilience4j.readme.io/) | Circuit breaker library |
+| Bulkhead Pattern | [microservices.io](https://microservices.io/patterns/reliability/bulkhead.html) | Isolate resources |

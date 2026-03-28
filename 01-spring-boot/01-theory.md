@@ -1405,6 +1405,57 @@ resilience4j:
 
 ## 📝 TÓM TẮT PHASE 1
 
+### Các chủ đề cần nắm vững (theo roadmap.sh/spring-boot):
+
+**1. Spring Fundamentals:**
+- ✅ Dependency Injection (DI), Inversion of Control (IoC)
+- ✅ Spring IOC Container
+- ✅ Spring AOP (Aspect-Oriented Programming)
+- ✅ Spring MVC architecture
+- ✅ Annotations (@Component, @Service, @Repository, @Controller, etc.)
+- ✅ Spring Bean Scopes (singleton, prototype, request, session)
+- ✅ Architecture & Terminology
+- ✅ "Why use Spring?" - Benefits over plain J2EE
+
+**2. Spring Security:**
+- ✅ Authentication (username/password, JWT)
+- ✅ Authorization (role-based, permission-based)
+- ✅ OAuth2 (authorization flow)
+- ✅ JWT Authentication (tokens, validation)
+
+**3. Boot Features:**
+- ✅ Spring Boot Starters (web, data-jpa, security, etc.)
+- ✅ Auto-configuration (how it works, conditional annotations)
+- ✅ Actuators (health, metrics, info endpoints)
+- ✅ Embedded Server (Tomcat, Jetty, Undertow)
+
+**4. Data Access:**
+- ✅ Hibernate (Transactions, Relationships, Entity Lifecycle)
+- ✅ Spring Data JPA (Repository pattern, query methods)
+- ✅ Spring Data MongoDB
+- ✅ Spring Data JDBC
+
+**5. Microservices (Spring Cloud):**
+- ✅ Spring Cloud Gateway
+- ✅ Spring Cloud Config (centralized configuration)
+- ✅ Spring Cloud Circuit Breaker (Resilience4j)
+- ✅ Spring Cloud OpenFeign (declarative REST client)
+- ✅ Micrometer (metrics collection)
+- ✅ Eureka (service discovery)
+
+**6. Web & Components:**
+- ✅ Servlet API
+- ✅ JSP Files (legacy, but good to know)
+- ✅ Components architecture
+
+**7. Testing:**
+- ✅ JPA Test (@DataJpaTest)
+- ✅ Mock MVC (web layer testing)
+- ✅ @SpringBootTest (integration tests)
+- ✅ @MockBean Annotation (mocking beans)
+
+---
+
 Sau phase này, bạn cần nắm được:
 
 1. ✅ Spring Core: DI, IoC, Bean scopes, Annotations
@@ -1421,3 +1472,55 @@ Sau phase này, bạn cần nắm được:
 ## 🔜 TIẾP THEO
 
 Đọc `02-examples.md` để xem code mẫu thực tế và `03-exercises.md` để làm bài tập!
+
+---
+
+## 📚 TÀI LIỆU THAM KHẢO
+
+### Auto-configuration & Starters
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Spring Boot Auto-configuration | [Spring Docs](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-auto-configuration) | How auto-configuration works, conditional annotations |
+| Creating a Custom Starter | [Spring Docs](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-auto-configuration.custom-starter) | Build your own starter |
+| Spring Boot Starters | [Baeldung](https://www.baeldung.com/spring-boot-starters) | Complete guide to starters |
+
+### Actuator & Profiles
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Spring Boot Actuator | [Spring Docs](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html) | Production monitoring, health checks, metrics |
+| Custom Health Indicators | [Baeldung](https://www.baeldung.com/spring-boot-health-indicator) | Build custom health indicators |
+| Spring Profiles | [Baeldung](https://www.baeldung.com/spring-profiles) | Profile-based configuration |
+
+### Spring MVC & REST
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Building a RESTful Web Service | [Spring Guide](https://spring.io/guides/gs/rest-service/) | Official REST tutorial |
+| Exception Handling in Spring MVC | [Baeldung](https://www.baeldung.com/exception-handling-for-rest-with-spring) | @ControllerAdvice, @ExceptionHandler |
+| Request Validation | [Baeldung](https://www.baeldung.com/spring-boot-bean-validation) | Bean validation with @Valid |
+
+### Spring Data JPA & Transactions
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Spring Data JPA | [Spring Docs](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/) | Repository pattern, query methods |
+| @Transactional Explained | [Baeldung](https://www.baeldung.com/spring-transactional-propagation-isolation) | Propagation, isolation levels |
+| Hibernate Best Practices | [Vlad Mihalcea](https://vladmihalcea.com/) | JPA/Hibernate performance tips |
+
+### Spring Security
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Spring Security Reference | [Spring Docs](https://docs.spring.io/spring-security/reference/) | Complete security guide |
+| JWT Authentication | [Baeldung](https://www.baeldung.com/security-spring) | Implement JWT auth |
+| OAuth2 with Spring | [Baeldung](https://www.baeldung.com/spring-security-oauth) | OAuth2, OIDC configuration |
+
+### Testing
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Testing Spring Boot | [Spring Docs](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.testing) | @SpringBootTest, test slices |
+| Mocking with Mockito | [Baeldung](https://www.baeldung.com/mockito-mock-annotations) | @Mock, @InjectMocks, @Spy |
+| Testcontainers Guide | [Baeldung](https://www.baeldung.com/spring-boot-testcontainers) | Integration tests with Docker |

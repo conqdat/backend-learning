@@ -1772,19 +1772,124 @@ optional.ifPresentOrElse(
 
 ## 📝 TÓM TẮT
 
-### Các chủ đề cần nắm vững:
+### Các chủ đề cần nắm vững (theo roadmap.sh/java):
 
-1. **Basics:** Syntax, Data Types, Strings, Arrays, Loops
-2. **OOP:** Classes, Inheritance, Polymorphism, Encapsulation, Abstraction
-3. **Collections:** List, Set, Map, Queue, Iterator, Generics
-4. **Functional Programming:** Lambda, Stream API, Functional Interfaces
-5. **Exception Handling:** Try-catch, Custom exceptions
-6. **Concurrency:** Threads, Synchronization, ExecutorService, CompletableFuture
-7. **I/O:** File operations, Networking, Regex, Date/Time
-8. **Modern Java:** Records, Optional, Modules, Annotations
+**1. Fundamentals (Cơ bản):**
+- ✅ Basic Syntax, Variables, Scopes
+- ✅ Data Types (Primitive + Reference)
+- ✅ Type Casting, Strings and Methods
+- ✅ Arrays, Conditionals, Loops
+- ✅ Math Operations, Lifecycle of a Program
+
+**2. Object Oriented Programming:**
+- ✅ Classes and Objects, Attributes, Methods
+- ✅ Access Specifiers (public, private, protected)
+- ✅ Static Keyword, Nested Classes
+- ✅ Abstraction, Inheritance, Encapsulation
+- ✅ Method Overloading / Overriding
+- ✅ Static vs Dynamic Binding
+- ✅ Interfaces, Abstract Classes
+- ✅ Enums, Record (Java 14+)
+- ✅ Packages, Initializer Block
+- ✅ Pass by Value / Pass by Reference
+- ✅ Method Chaining, Final Keyword
+- ✅ Object Lifecycle (creation, garbage collection)
+
+**3. Core APIs & Features:**
+- ✅ Annotations (built-in + custom)
+- ✅ Lambda Expressions
+- ✅ Modules (Java 9+)
+- ✅ Optionals
+- ✅ Exception Handling
+- ✅ Date and Time (Java 8+ DateTime API)
+- ✅ Networking (HTTP Client, Sockets)
+- ✅ Regular Expressions
+- ✅ Cryptography (basic security)
+
+**4. Collections & Data:**
+- ✅ Collections Framework (List, Set, Map, Queue)
+- ✅ Generic Collections
+- ✅ Array vs ArrayList
+- ✅ Iterator, ListIterator
+- ✅ JDBC (database connectivity)
+- ✅ Spring Data JPA, Hibernate (ORM)
+
+**5. Functional Programming:**
+- ✅ Functional Interfaces
+- ✅ Functional Composition
+- ✅ High Order Functions
+- ✅ Stream API (intermediate + terminal operations)
+- ✅ Collectors
+
+**6. Concurrency:**
+- ✅ Threads (creation, lifecycle)
+- ✅ Synchronization, Volatile keyword
+- ✅ java.util.concurrent utilities
+- ✅ ExecutorService, Thread Pools
+- ✅ CompletableFuture
+- ✅ Virtual Threads (Java 21+)
+- ✅ Java Memory Model
+
+**7. I/O Operations:**
+- ✅ File Operations (Java NIO.2)
+- ✅ Networking (HTTP Client, Sockets)
+
+**8. Tools & Frameworks:**
+- ✅ Build Tools: Maven, Gradle
+- ✅ Logging: SLF4J, Logback, Log4j2
+- ✅ Testing: JUnit, Mockito, TestNG
+- ✅ Web: Spring Boot (recommended), Play Framework, Quarkus
+- ✅ Documentation: Javadoc
+
+---
+
+### 🔥 Các chủ đề nâng cao cần study thêm:
+
+| Chủ đề | Mô tả | Tài liệu |
+|--------|-------|----------|
+| Virtual Threads | Lightweight threads (Project Loom) | [OpenJDK](https://openjdk.org/jeps/444) |
+| Java Memory Model | Heap, Stack, Metaspace | [Baeldung](https://www.baeldung.com/java-memory-management-interview-questions) |
+| Cryptography | Encryption, hashing, digital signatures | [Oracle Docs](https://docs.oracle.com/en/java/javase/17/security/) |
+| Modules (Jigsaw) | Module system (Java 9+) | [Baeldung](https://www.baeldung.com/java-9-module-system) |
 
 ---
 
 ## 🔜 TIẾP THEO
 
 Đọc `02-examples.md` để xem code mẫu thực tế và `03-exercises.md` để làm bài tập!
+
+---
+
+## 📚 TÀI LIỆU THAM KHẢO
+
+### Collections Framework
+
+| # | URL | Mô tả |
+|---|-----|-------|
+| 1 | https://jenkov.com/tutorials/java-collections/index.html | Jenkov — giải thích internals từng collection |
+| 2 | https://www.baeldung.com/java-hashmap | Baeldung — HashMap deep dive |
+| 3 | https://www.baeldung.com/java-concurrenthashmap | Baeldung — ConcurrentHashMap |
+
+### Concurrency & Multithreading
+
+| # | URL | Mô tả |
+|---|-----|-------|
+| 1 | https://jenkov.com/tutorials/java-concurrency/index.html | Jenkov — Java Concurrency full series |
+| 2 | https://www.baeldung.com/java-concurrency | Baeldung — Concurrency topic list |
+| 3 | https://www.baeldung.com/java-completablefuture | Baeldung — CompletableFuture |
+
+### JVM Internals & GC
+
+| # | URL | Mô tả |
+|---|-----|-------|
+| 1 | https://www.baeldung.com/jvm-garbage-collectors | Baeldung — GC types & tuning |
+| 2 | https://www.baeldung.com/java-memory-management-interview-questions | Baeldung — JVM Memory model |
+| 3 | https://jenkov.com/tutorials/java-performance/jvm-memory-model.html | Jenkov — JVM Memory layout |
+
+### Stream API & Java 8+
+
+| # | URL | Mô tả |
+|---|-----|-------|
+| 1 | https://www.baeldung.com/java-8-streams | Baeldung — Streams đầy đủ |
+| 2 | https://www.baeldung.com/java-optional | Baeldung — Optional |
+| 3 | https://jenkov.com/tutorials/java-functional-programming/index.html | Jenkov — Functional Programming in Java |

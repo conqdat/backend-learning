@@ -1132,7 +1132,95 @@ kubectl config use-context ctx-cluster2
 
 ---
 
-## 📚 TÓM TẮT
+## 📚 TÓM TẮT (theo roadmap.sh/kubernetes)
+
+### Các chủ đề cần nắm vững:
+
+**1. Introduction:**
+- ✅ Overview of Kubernetes
+- ✅ Why use Kubernetes?
+- ✅ Key Concepts and Terminologies
+- ✅ Kubernetes Alternatives (Docker Swarm, Nomad, ECS)
+
+**2. Containers:**
+- ✅ Container basics (Docker)
+- ✅ Container images
+- ✅ Container runtimes
+
+**3. Setting up Kubernetes:**
+- ✅ Installing the Control Plane
+- ✅ Adding and Managing Worker Nodes
+- ✅ Should you manage your own Cluster?
+- ✅ Managed Kubernetes (EKS, GKE, AKS)
+
+**4. Running Applications:**
+- ✅ Pods
+- ✅ ReplicaSets
+- ✅ Deployments
+- ✅ StatefulSets
+- ✅ Jobs & CronJobs
+
+**5. Services and Networking:**
+- ✅ External Access to Services
+- ✅ Load Balancing
+- ✅ Networking & Pod-to-Pod Communication
+- ✅ Ingress, ClusterIP, NodePort, LoadBalancer
+
+**6. Configuration Management:**
+- ✅ Injecting Pod Config with ConfigMaps
+- ✅ Using Secrets for Sensitive Data
+
+**7. Resource Management:**
+- ✅ Setting Resource Requests and Limits
+- ✅ Assigning Quotas to Namespaces
+- ✅ Monitoring & Optimizing Resource Usage
+
+**8. Security:**
+- ✅ Role Based Access Control (RBAC)
+- ✅ Network Security
+- ✅ Container and Pod Security
+
+**9. Monitoring and Logging:**
+- ✅ Logs
+- ✅ Metrics
+- ✅ Traces
+- ✅ Resource Health
+- ✅ Observability Engines
+
+**10. Autoscaling:**
+- ✅ Horizontal Pod Autoscaler (HPA)
+- ✅ Vertical Pod Autoscaler (VPA)
+- ✅ Cluster Autoscaling
+
+**11. Scheduling:**
+- ✅ Basics
+- ✅ Taints and Tolerations
+- ✅ Topology Spread Constraints
+- ✅ Pod Priorities
+- ✅ Evictions
+
+**12. Storage and Volumes:**
+- ✅ CSI Drivers
+- ✅ Stateful Applications
+- ✅ Persistent Volumes
+
+**13. Deployment Patterns:**
+- ✅ CI/CD Integration
+- ✅ GitOps
+- ✅ Helm Charts
+- ✅ Canary Deployments
+- ✅ Rolling Updates / Rollbacks
+- ✅ Blue-Green Deployments
+
+**14. Advanced Topics:**
+- ✅ Creating Custom Controllers
+- ✅ Custom Schedulers and Extenders
+- ✅ Custom Resource Definitions (CRDs)
+- ✅ Kubernetes Extensions and APIs
+- ✅ Multi-Cluster Management
+- ✅ Cluster Operations
+
+---
 
 1. ✅ Kubernetes overview & when to use
 2. ✅ Kubernetes architecture (Control Plane, Worker Nodes)

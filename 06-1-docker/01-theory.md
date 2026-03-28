@@ -943,7 +943,81 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 
 ---
 
-## 📚 TÓM TẮT
+## 📚 TÓM TẮT (theo roadmap.sh/docker)
+
+### Các chủ đề cần nắm vững:
+
+**1. Introduction:**
+- ✅ What are Containers?
+- ✅ Why do we need Containers?
+- ✅ Bare Metal vs VMs vs Containers
+
+**2. Prerequisites:**
+- ✅ Linux Fundamentals (Package Managers, Users/Groups Permissions, Shell Commands, Shell Scripting)
+- ✅ Programming Languages (basic scripting)
+- ✅ Application Architecture
+- ✅ Underlying Technologies (Namespaces, cgroups, Union Filesystems)
+
+**3. Installation / Setup:**
+- ✅ Docker Desktop (Win/Mac/Linux)
+- ✅ Docker Engine (Linux)
+
+**4. Basics of Docker:**
+- ✅ Images vs Containers
+- ✅ Docker architecture
+- ✅ Basic commands (pull, run, ps, stop, rm)
+
+**5. Data Persistence:**
+- ✅ Ephemeral Container Filesystem
+- ✅ Volume Mounts
+- ✅ Bind Mounts
+
+**6. Using 3rd Party Container Images:**
+- ✅ Databases (PostgreSQL, MySQL, MongoDB, Redis)
+- ✅ Command Line Utilities
+
+**7. Building Container Images:**
+- ✅ Dockerfiles
+- ✅ Efficient Layer Caching
+- ✅ Image Size and Security
+
+**8. Container Registries:**
+- ✅ Docker Hub
+- ✅ Image Tagging Best Practices
+- ✅ Others (ghcr, ecr, gcr, acr)
+
+**9. Running Containers:**
+- ✅ docker run
+- ✅ docker compose
+- ✅ Runtime Configuration Options
+
+**10. Container Security:**
+- ✅ Runtime Security
+- ✅ Image Security
+
+**11. Docker CLI:**
+- ✅ Images (inspect, history, prune)
+- ✅ Containers (logs, exec, inspect)
+- ✅ Volumes
+- ✅ Networks
+
+**12. Developer Experience:**
+- ✅ Hot Reloading
+- ✅ Debuggers
+- ✅ Tests
+- ✅ Continuous Integration
+
+**13. Deploying Containers:**
+- ✅ PaaS Options
+- ✅ Kubernetes
+- ✅ Nomad
+- ✅ Docker Swarm
+
+**14. Networking:**
+- ✅ Bridge, Host, Overlay networks
+- ✅ Service Discovery
+
+---
 
 1. ✅ Linux fundamentals & shell commands
 2. ✅ Container underlying technologies (namespaces, cgroups, union filesystems)
@@ -959,6 +1033,7 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 12. ✅ Image tagging best practices
 13. ✅ Logging & debugging
 14. ✅ Docker in CI/CD
+15. ✅ Deploying containers (Swarm, Kubernetes, Nomad)
 
 ---
 

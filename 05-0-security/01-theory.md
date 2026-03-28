@@ -198,3 +198,46 @@ public class OAuth2Config {
 ## 🔜 TIẾP THEO
 
 Phase 5 sẽ có examples và exercises thực tế!
+
+---
+
+## 📚 TÀI LIỆU THAM KHẢO
+
+### Spring Security
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Spring Security Reference | [Spring Docs](https://docs.spring.io/spring-security/reference/) | Official documentation |
+| Spring Security 6 Migration | [Spring Guide](https://spring.io/blog/2022/02/21/spring-security-without-the-websecurityconfigureradapter) | Migrate to SecurityFilterChain |
+| Baeldung Spring Security | [baeldung.com/spring-security](https://www.baeldung.com/security-spring) | Comprehensive tutorials |
+
+### JWT Implementation
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| JWT.io | [jwt.io](https://jwt.io/) | JWT decoder/encoder, libraries |
+| Introduction to JSON Web Tokens | [jwt.io/introduction](https://jwt.io/introduction/) | JWT basics |
+| JWT Best Practices | [auth0.com](https://auth0.com/blog/a-look-at-the-latest-draft-for-jwt-bcp/) | Security best practices |
+
+### OAuth2 & OIDC
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| OAuth2 Simplified | [aaronparecki.com](https://aaronparecki.com/oauth-2-simplified/) | Easy to understand OAuth2 |
+| OAuth2 Spec | [oauth.net/2](https://oauth.net/2/) | Official OAuth2 specification |
+| OpenID Connect | [openid.net/connect](https://openid.net/connect/) | OIDC specification |
+
+### Security Best Practices
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| OWASP Top 10 | [owasp.org/www-project-top-ten](https://owasp.org/www-project-top-ten/) | Most critical security risks |
+| OWASP Cheat Sheet | [cheatsheetseries.owasp.org](https://cheatsheetseries.owasp.org/) | Security cheat sheets |
+| Auth0 Blog | [auth0.com/blog](https://auth0.com/blog/) | Authentication & security articles |
+
+### Password Storage
+
+| Resource | Link | Nội dung |
+|----------|------|----------|
+| Password Storage Cheat Sheet | [OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) | Secure password storage |
+| BCrypt Explained | [windsock.io](https://windsock.io/what-exactly-is-bcrypt/) | Understanding bcrypt |
