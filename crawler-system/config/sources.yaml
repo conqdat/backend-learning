@@ -1,0 +1,71 @@
+# Crawler Sources Configuration
+# Each source defines URLs to crawl and target folders
+
+java_core:
+  w3schools:
+    base_url: "https://www.w3schools.com/java"
+    target_folder: "backend/01_java-core"
+    content_type: "theory"
+    # W3Schools blocks automated crawlers - skip for now
+    pages: []
+
+  programiz:
+    base_url: "https://www.programiz.com"
+    target_folder: "backend/01_java-core"
+    content_type: "theory"
+    # Programiz blocks automated requests - skip for now
+    pages: []
+
+  oracle:
+    base_url: "https://docs.oracle.com/javase/tutorial"
+    target_folder: "backend/01_java-core"
+    content_type: "theory"
+    pages:
+      - "/java/index.html"
+      - "/java/concepts/index.html"
+      - "/java/javaOOPs/index.html"
+      - "/java/essential/index.html"
+      - "/java/collections/index.html"
+      - "/java/concurrency/index.html"
+      - "/java/uiswing/index.html"
+      - "/java/generics/index.html"
+      - "/java/lambda/index.html"
+
+  baeldung:
+    base_url: "https://www.baeldung.com"
+    target_folder: "backend/01_java-core"
+    content_type: "theory"
+    pages:
+      - "/java-tutorial"
+      - "/java-collections"
+      - "/java-threads"
+      - "/java-oop"
+      - "/java-design-patterns"
+
+spring_framework:
+  spring_official:
+    base_url: "https://spring.io/guides"
+    target_folder: "backend/02_spring-framework"
+    content_type: "theory"
+
+  baeldung:
+    base_url: "https://www.baeldung.com/spring-tutorial"
+    target_folder: "backend/02_spring-framework"
+    content_type: "theory"
+
+frontend_javascript:
+  javascript_info:
+    base_url: "https://javascript.info"
+    target_folder: "frontend/01_javascript"
+    content_type: "theory"
+
+  mdn:
+    base_url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+    target_folder: "frontend/01_javascript"
+    content_type: "theory"
+
+devops_linux:
+  linuxcommand:
+    base_url: "https://linuxcommand.org/lc3_learning_the_shell.php"
+    target_folder: "devops/01_linux"
+    content_type: "theory"
