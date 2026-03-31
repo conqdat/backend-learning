@@ -4,12 +4,12 @@
 
 ## 📚 Nội dung
 
-| File | Mô tả |
-|------|-------|
-| `theory.md` | Lý thuyết, concepts |
-| `exercises.md` | Bài tập thực hành |
+| File                | Mô tả               |
+| ------------------- | ------------------- |
+| `theory.md`         | Lý thuyết, concepts |
+| `exercises.md`      | Bài tập thực hành   |
 | `best-practices.md` | Kinh nghiệm thực tế |
-| `resources.md` | Nguồn học bổ sung |
+| `resources.md`      | Nguồn học bổ sung   |
 
 ## 🗺️ Roadmap
 
@@ -26,13 +26,13 @@
 
 ## 📖 Nguồn học chính
 
-| Cấp độ | Nguồn | Link |
-|--------|-------|------|
-| 🟢 Beginner | javascript.info | https://javascript.info/ |
-| 🟢 Beginner | MDN JavaScript | https://developer.mozilla.org/en-US/docs/Web/JavaScript |
-| 🟡 Intermediate | ES6 Features | http://es6-features.org/ |
-| 🟡 Intermediate | You Don't Know JS | https://github.com/getify/You-Dont-Know-JS |
-| 🟠 Advanced | 33 JS Concepts | https://github.com/leonardomso/33-js-concepts |
+| Cấp độ          | Nguồn             | Link                                                    |
+| --------------- | ----------------- | ------------------------------------------------------- |
+| 🟢 Beginner     | javascript.info   | https://javascript.info/                                |
+| 🟢 Beginner     | MDN JavaScript    | https://developer.mozilla.org/en-US/docs/Web/JavaScript |
+| 🟡 Intermediate | ES6 Features      | http://es6-features.org/                                |
+| 🟡 Intermediate | You Don't Know JS | https://github.com/getify/You-Dont-Know-JS              |
+| 🟠 Advanced     | 33 JS Concepts    | https://github.com/leonardomso/33-js-concepts           |
 
 ## 💻 Thực hành
 
